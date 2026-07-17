@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SearchHub Mobile</title>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="display" content="standalone">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="SearchHub">
+  <meta name="theme-color" content="#ffffff">
+  
+  <link rel="apple-touch-icon-precomposed" href="https://i.ibb.co/Xrt68V7p/icon.png">
+  <link rel="shortcut icon" href="https://i.ibb.co/Xrt68V7p/icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- 🚀 JANコード専用の爆速解析エンジン(Quagga)に切り替え -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  
+  <style>
+    body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Meiryo", sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    background-color: #ffffff;
+    color: #333; 
+    padding-bottom: env(safe-area-inset-bottom); 
+    min-height: 100vh;
+  }
+    
+    .header-wrapper { position: sticky; top: 0; z-index: 100; background-color: #000000; padding-top: env(safe-area-inset-top); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header { background-color: #1a365d; color: white; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; position: relative; }
+    
+    .header-left { display: flex; gap: 12px; align-items: center; z-index: 2; width: 90px;}
+    .header-center { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; width: 40%; z-index: 1; }
+    .header h1 { margin: 0; font-size: 15px; font-weight: bold; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-right { display: flex; gap: 14px; align-items: center; z-index: 2; width: 90px; justify-content: flex-end;}
+    
+    .header-btn { background: none; border: none; color: white; font-size: 18px; cursor: pointer; outline: none; padding: 5px; transition: transform 0.5s ease; display: flex; align-items: center; justify-content: center;}
+    .last-update { font-size: 10px; color: #a0aec0; margin-top: 2px; }
+    
+    .discord-btn { font-size: 20px; transition: color 0.3s, transform 0.1s; }
+    .discord-btn:active { transform: scale(0.9); }
+    .discord-on { color: #5865F2 !important; }
+    .discord-off { color: #4a5568 !important; opacity: 0.4; }
+
+    .view { display: none; }
+    .view.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* --- 新ホーム画面（グラフ＆ダッシュボード） --- */
+    .graph-card { background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 16px; border: 1px solid #d5d9d9; min-height: 290px; }
+    .home-top-tabs { display: flex; justify-content: flex-start; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #d5d9d9; }
+    .home-tab-btn { padding: 8px 12px; border: none; font-size: 13px; font-weight: bold; background: transparent; color: #565959; cursor: pointer; border-bottom: 3px solid transparent; flex: 1; text-align: center; }
+    .home-tab-btn.active { color: #008296; border-bottom: 3px solid #008296; }
+    .summary-header { margin-bottom: 16px; height: 50px; }
+    .summary-date { font-size: 11px; color: #565959; margin-bottom: 4px; font-weight:bold; }
+    .summary-values { display: flex; gap: 20px; align-items: flex-end; }
+    .summary-box .summary-label { font-size: 10px; color: #565959; margin-bottom: 2px; }
+    .summary-box .summary-value { font-size: 20px; font-weight: 900; color: #0f1111; line-height: 1; }
+    .summary-box .summary-value.highlight { color: #E47911; }
+    .chart-wrapper { height: 200px; width: 100%; position: relative; }
+    
+    #homeMonthTabsArea { display: flex; overflow-x: auto; gap: 8px; margin-top: 16px; padding-bottom: 8px; }
+    #homeMonthTabsArea::-webkit-scrollbar { display: none; }
+    .home-month-btn { padding: 6px 16px; border: 1px solid #d5d9d9; border-radius: 20px; background: #ffffff; color: #0f1111; font-size: 12px; white-space: nowrap; cursor: pointer; }
+    .home-month-btn.active { background: #f3fbfd; border-color: #008296; color: #008296; font-weight: bold; }
+
+    /* 円グラフ（回転率） */
+    .turnover-container { display: grid; grid-template-columns: 1.2fr 1fr; gap: 10px; align-items: center; height: 210px; }
+    .metrics-list { display: flex; flex-direction: column; gap: 6px; }
+    .metric-item { display: flex; justify-content: space-between; font-size: 11px; color: #565959; border-bottom: 1px dashed #eee; padding-bottom: 2px; }
+    .metric-value { font-weight: bold; color: #0f1111; }
+    .metric-value.profit { color: #E47911; }
+    .chart-box { position: relative; display: flex; justify-content: center; align-items: center; }
+    .circular-chart { width: 140px; height: 140px; }
+    .circle-bg { fill: none; stroke: #e6e6e6; stroke-width: 3.8; }
+    .circle-base { fill: none; stroke: #008296; stroke-width: 3.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
+    .circle-over { fill: none; stroke: #E47911; stroke-width: 3.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out 0.5s; }
+    .percentage { position: absolute; font-family: 'Roboto', sans-serif; font-size: 28px; font-weight: 900; color: #0f1111; display: flex; flex-direction: column; align-items: center; }
+    .percentage span { font-size: 10px; color: #565959; margin-top: -5px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+
+    /* 下部ボタン群のリファイン */
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 20px 16px; }
+    .dash-btn { position: relative; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 10px; text-align: center; color: #1a365d; font-weight: bold; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.1s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;}
+    .dash-btn:active { transform: scale(0.95); background: #f8fafc; }
+    .dash-btn i { font-size: 26px; }
+    .dash-dot { display: none; position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background-color: #e53e3e; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); border: 2px solid white; }
+    .dash-dot.active { display: block; animation: pop 0.3s ease; }
+
+    .tabs-container { background-color: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: calc(52px + env(safe-area-inset-top)); z-index: 99; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tabs-container::-webkit-scrollbar { display: none; }
+    .tabs { display: flex; white-space: nowrap; padding: 0 4px; }
+    .tab-btn { position: relative; padding: 12px 14px; background: none; border: none; font-size: 12px; font-weight: bold; color: #718096; border-bottom: 3px solid transparent; outline: none; flex-shrink: 0; }
+    .tab-btn.active { color: #2b6cb0; border-bottom-color: #2b6cb0; background-color: #ebf8ff; }
+    .tab-dot { display: none; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background-color: #e53e3e; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .tab-dot.active { display: block; animation: pop 0.3s ease; }
+    @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+    
+    .content { padding: 12px; min-height: 80vh; transform: translate3d(0,0,0); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; }
+    .card.read-card { background: #e9ecef !important; opacity: 0.55; border-color: #ced4da !important; box-shadow: none; }
+    .card.read-card .item-title a { color: #6c757d !important; }
+    .card.read-card .price-tag { color: #6c757d !important; }
+    .card.read-card .status-tag { color: #6c757d !important; }
+    .card.read-card .auto-asin-btn { background: #6c757d !important; opacity: 0.7; }
+
+    .no-data { text-align: center; color: #a0aec0; padding: 30px 10px; font-size: 12px; }
+    .loading-spinner { text-align: center; padding: 40px; font-size: 13px; color: #2b6cb0; font-weight: bold; }
+
+    .search-box { display: flex; gap: 6px; margin-bottom: 12px; }
+    .search-box input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; outline: none; background: white; }
+    .search-box button { background: #07A27B; color: #fff; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; }
+    .search-bar-only { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; outline: none; background: white; margin-bottom: 12px; box-sizing: border-box; }
+    
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; padding-bottom: 20px; }
+    .page-btn { background: #e2e8f0; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; color: #4a5568; cursor: pointer; }
+    .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .page-info { font-size: 12px; font-weight: bold; color: #718096; }
+
+    .calc-box { background: #333333; color: #fff; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: bold; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .calc-row { margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .calc-row input { width: 120px; text-align: right; font-size: 14px; font-weight: bold; border-radius: 4px; border: none; padding: 4px 8px; color: #000; background: white; outline: none; }
+    
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .btn-link { display: flex; justify-content: center; align-items: center; color: #fff; text-decoration: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .badge { padding: 2px 6px; border-radius: 4px; font-weight: 900; font-size: 10px; }
+    
+    .register-btn { background: #243c5a; color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); transition: background 0.2s; }
+    
+    .item-title { font-size: 13px; font-weight: bold; margin-bottom: 6px; }
+    .item-title a { color: #2b6cb0; text-decoration: none; display: block; line-height: 1.4; word-break: break-all; }
+    .item-meta { font-size: 11px; color: #718096; display: flex; justify-content: space-between; align-items: center; }
+    .status-tag { color: #e53e3e; font-weight: bold; }
+    .price-tag { color: #07A27B; font-size: 14px; font-weight: 900; }
+    .auto-asin-btn { background: #ff9900; color: #fff; border: none; padding: 8px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; margin-top:8px;}
+
+    #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s; }
+    .splash-img { width: 100%; height: 100%; object-fit: cover; }
+    .splash-text { position: absolute; bottom: 60px; color: white; font-size: 14px; font-weight: bold; letter-spacing: 2px; animation: pulse 1.5s infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-content { background: white; padding: 20px; border-radius: 12px; width: 85%; max-width: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+    .modal-content h3 { margin-top: 0; font-size: 15px; color: #1a365d; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+    .modal-content label { display: block; font-size: 11px; font-weight: bold; margin-top: 12px; color: #4a5568; }
+    .modal-content input { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
+    .modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
+    
+    /* 🚀 ステップ②: 引っ張って更新の見た目追加 */
+    #ptr-indicator { position: fixed; top: -50px; left: 0; width: 100%; text-align: center; z-index: 1000; transition: top 0.3s; font-weight: bold; color: #008296; font-size: 13px; background: rgba(255,255,255,0.95); padding: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 0 0 12px 12px; pointer-events: none;}
+  </style>
+</head>
+<body>
+  <div id="ptr-indicator">⬇️ 引っ張って更新...</div>
+
+  <div id="loader">
+    <img class="splash-img" src="https://i.ibb.co/R49z2pwV/Chat-GPT-Image-2026-5-31-20-50-12.png" alt="Splash">
+    <div class="splash-text">SYSTEM LOADING...</div>
+  </div>
+
+  <div class="header-wrapper">
+    <div class="header">
+      <div class="header-left">
+        <button class="header-btn" id="backBtn" style="display:none;" onclick="goBack()"><i class="fas fa-chevron-left"></i></button>
+        <button class="header-btn" onclick="openConfig()"><i class="fas fa-cog"></i></button>
+        <button class="header-btn" onclick="openExpenseModal()"><i class="fas fa-file-invoice-dollar"></i></button>
+      </div>
+      <div class="header-center">
+        <h1 id="headerTitle">SearchHub Mobile</h1>
+        <div class="last-update" id="lastUpdate">待機中...</div>
+      </div>
+      <div class="header-right">
+        <button class="header-btn discord-btn discord-off" id="dcToggleBtn" onclick="toggleDiscord()"><i class="fab fa-discord"></i></button>
+        <button class="header-btn" onclick="forceReload(this)"><i class="fas fa-sync-alt"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-home" class="view active">
+    <div class="graph-card">
+      <div class="home-top-tabs">
+        <button class="home-tab-btn active" onclick="switchHomeTab('turnover', this)">回転率</button>
+        <button class="home-tab-btn" onclick="switchHomeTab('purchase', this)">仕入</button>
+        <button class="home-tab-btn" onclick="switchHomeTab('sales', this)">販売</button>
+      </div>
+      
+      <div id="homeGraphContent">
+        <div style="text-align:center; padding:30px; color:#a0aec0; font-size:12px;">⌛ データを同期中...</div>
+      </div>
+      
+      <div id="homeMonthTabsArea" style="display:none;"></div>
+    </div>
+
+    <div class="dashboard-grid">
+      <button class="dash-btn" onclick="openView('view-amazon')"><i class="fab fa-amazon" style="color:#ff9900;"></i>リサーチ</button>
+      <button class="dash-btn" onclick="openView('view-researcher'); loadResearcherData();"><i class="fas fa-clipboard-check" style="color:#a855f7;"></i>Researcher精査<span class="dash-dot" id="dash-dot-researcher"></span></button>
+      <button class="dash-btn" onclick="openView('view-price')"><i class="fas fa-yen-sign" style="color:#1a365d;"></i>価格改定</button>
+      <button class="dash-btn" onclick="openView('view-monthly')"><i class="fas fa-chart-bar" style="color:#55a676;"></i>月別データ詳細</button>
+      <button class="dash-btn" onclick="openView('view-watcher')"><i class="fas fa-eye" style="color:#07A27B;"></i>Watcher<span class="dash-dot" id="dash-dot-watcher"></span></button>
+      <button class="dash-btn" onclick="openView('view-sniper')"><i class="fas fa-crosshairs" style="color:#e53e3e;"></i>Sniper<span class="dash-dot" id="dash-dot-sniper"></span></button>
+    </div>
+  </div>
+
+  <div id="view-amazon" class="view">
+    <div class="content">
+      <div class="search-box">
+        <input type="text" id="amazonKw" placeholder="ASINや型番を入力...">
+        <!-- 🚀 スキャンテストボタンを配置 -->
+        <button onclick="startBarcodeScanTest()" id="scanTestBtn" style="background:#4a5568; padding:0 12px;"><i class="fas fa-camera"></i></button>
+        <button onclick="runAmazonResearch()" id="searchBtn">解析</button>
+      </div>
+      
+      <!-- 🚀 カメラプレビューおよび描画用キャンバスエリアを新設 -->
+      <div id="barcodeTestScannerArea" style="display:none; width:100%; max-width:400px; margin: 10px auto; border: 2px solid #333; border-radius: 8px; overflow: hidden; position: relative; background:#000;">
+        <!-- 🎯 videoタグからdivタグに変更して衝突を回避 -->
+        <div id="barcodeTestVideo" style="width:100%; height:auto; display:block;"></div>
+        <canvas id="barcodeTestCanvas" style="display:none;"></canvas>
+        <div style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.7); color:#fff; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; z-index:11; cursor:pointer;" onclick="stopBarcodeScanTest()">閉じる</div>
+        <div id="barcodeTestStatus" style="position:absolute; bottom:10px; left:0; width:100%; text-align:center; background:rgba(0,0,0,0.7); color:#fff; padding:4px 0; font-size:12px; font-weight:bold;">バーコードを枠内に映してな...</div>
+      </div>
+
+      <div id="amazonHistoryArea" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
+      
+      <div id="amazonResult">
+        <div class="card" style="text-align:center; color:#a0aec0; padding:20px; font-size:12px;">ASINやキーワードを入力して解析ボタンを押してな！</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-sniper" class="view">
+    <div class="tabs-container">
+      <div class="tabs" id="sniper-tabs">
+        <button class="tab-btn active" id="btn-sniper-mercari" onclick="switchTab('sniper-mercari', this, 'view-sniper')">メルカリ<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('sniper-paypay', this, 'view-sniper')">ヤフフリ<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('sniper-offmall', this, 'view-sniper')">オフモ<span class="tab-dot"></span></button>
+      </div>
+    </div>
+    <div class="content" id="content-sniper">
+      <div id="sniper-mercari" class="tab-content active"><div class="loading-spinner">同期待機中...</div></div>
+      <div id="sniper-paypay" class="tab-content"></div>
+      <div id="sniper-offmall" class="tab-content"></div>
+    </div>
+  </div>
+
+  <div id="view-watcher" class="view">
+    <div class="tabs-container">
+      <div class="tabs" id="watcher-tabs">
+        <button class="tab-btn active" id="btn-watcher-mercari" onclick="switchTab('watcher-mercari', this, 'view-watcher')">メルカリ<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('watcher-paypay', this, 'view-watcher')">ヤフフリ<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('watcher-yahoo', this, 'view-watcher')">ヤフオク<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('watcher-offmall', this, 'view-watcher')">オフモ<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('watcher-2nd', this, 'view-watcher')">セカスト<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('watcher-rakuma', this, 'view-watcher')">ラクマ<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('watcher-surugaya', this, 'view-watcher')">駿河屋<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('watcher-yshopping', this, 'view-watcher')">ヤフショ<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('watcher-aupay', this, 'view-watcher')">au PAY<span class="tab-dot"></span></button>
+        <button class="tab-btn" onclick="switchTab('watcher-trefac', this, 'view-watcher')">トレファク<span class="tab-dot"></span></button>
+      </div>
+    </div>
+    <div class="content" id="content-watcher">
+      <div id="watcher-mercari" class="tab-content active"><div class="loading-spinner">同期待機中...</div></div>
+      <div id="watcher-paypay" class="tab-content"></div>
+      <div id="watcher-yahoo" class="tab-content"></div>
+      <div id="watcher-offmall" class="tab-content"></div>
+      <div id="watcher-2nd" class="tab-content"></div>
+      <div id="watcher-rakuma" class="tab-content"></div>
+      <div id="watcher-surugaya" class="tab-content"></div>
+      <div id="watcher-yshopping" class="tab-content"></div>
+      <div id="watcher-aupay" class="tab-content"></div>
+      <div id="watcher-trefac" class="tab-content"></div>
+    </div>
+  </div>
+
+  <div id="view-history" class="view">
+    <div class="content">
+      <div class="search-box">
+        <input type="text" id="historyAsin" placeholder="ASINを入力 or ペースト" onkeypress="if(event.keyCode==13) searchHistory()">
+        <button onclick="searchHistory()" style="background:#4285f4;"><i class="fas fa-search"></i> 検索</button>
+      </div>
+      <div id="historyResult">
+        <div class="card" style="text-align:center; color:#a0aec0; padding:30px 10px; font-size:12px;">ASINを入力して検索ボタンを押してな！</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-researcher" class="view">
+    <div class="content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:12px; font-weight:bold; color:#4a5568;" id="resCount">候補を読み込み中...</span>
+        <div style="display:flex; gap:4px;">
+          <button onclick="copyAsins20()" style="background:#f7941d; color:white; border:none; padding:8px 12px; border-radius:6px; font-size:11px; font-weight:bold; box-shadow:0 1px 3px rgba(0,0,0,0.1);"><i class="fas fa-copy"></i> ASIN20件コピー</button>
+          <button onclick="removeCheckedItems()" style="background:#e53e3e; color:white; border:none; padding:8px 12px; border-radius:6px; font-size:11px; font-weight:bold; box-shadow:0 1px 3px rgba(0,0,0,0.1);"><i class="fas fa-trash-alt"></i> チェック削除</button>
+        </div>
+      </div>
+      
+      <div id="researcherResult">
+        </div>
+      
+      <button onclick="sendEliteItems(this)" style="width:100%; background:#07A27B; color:white; padding:14px; border:none; border-radius:8px; font-weight:bold; font-size:15px; margin-top:20px; box-shadow:0 4px 6px rgba(0,0,0,0.2);">🚀 残った商品を「仕入れsheet」へ登録！</button>
+    </div>
+  </div>
+
+  <div id="view-price" class="view">
+    <div class="content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 4px;">
+        
+        <span style="font-size:12px; font-weight:bold; color:#4a5568;" id="inventoryCount">在庫を読み込み中...</span>
+        
+        <div style="display:flex; gap:8px;">
+          <button id="keepaBtn" onclick="updateKeepaInventory()" style="background:#07A27B; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer; transition:0.2s;">
+            <i class="fas fa-cloud-download-alt"></i> 在庫更新
+          </button>
+          
+          <button onclick="loadInventoryPrice()" style="background:#1a365d; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">
+            <i class="fas fa-sync-alt"></i> 更新
+          </button>
+        </div>
+
+      </div>
+      <input type="text" id="price-search-kw" class="search-bar-only" placeholder="ASINや商品名で一発検索..." oninput="invCurrentPage=1; renderInventoryList();">
+      
+      <div id="priceResult">
+        <div class="loading-spinner">⌛ マネージャーシートから現役の在庫リストを抽出中...</div>
+      </div>
+      
+      <div id="price-pagination" class="pagination" style="display:none;">
+        <button class="page-btn" id="price-btn-prev" onclick="invCurrentPage--; renderInventoryList();">◀ 戻る</button>
+        <span class="page-info" id="price-page-info">1 / 1</span>
+        <button class="page-btn" id="price-btn-next" onclick="invCurrentPage++; renderInventoryList();">次へ ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-monthly" class="view">
+    <div class="tabs-container">
+      <div class="tabs" id="monthly-tabs">
+        <button class="tab-btn active" id="btn-monthly-purchase" onclick="switchMonthlyTab('monthly-purchase', this)">📦 仕入情報</button>
+        <button class="tab-btn" id="btn-monthly-sales" onclick="switchMonthlyTab('monthly-sales', this)">💰 販売情報</button>
+      </div>
+    </div>
+    
+    <div class="content" id="content-monthly">
+      <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <select id="monthly-selector" onchange="renderMonthlyData()" style="padding:8px; border-radius:6px; border:1px solid #cbd5e0; font-weight:bold; font-size:14px; outline:none; background:#fff; color:#1a365d; min-width: 140px;">
+          <option>読込中...</option>
+        </select>
+        <button onclick="loadMonthlyData()" style="background:#1a365d; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:11px; font-weight:bold;"><i class="fas fa-sync-alt"></i> 更新</button>
+      </div>
+      
+      <div id="monthly-summary" style="margin-bottom:16px;"></div>
+
+      <input type="text" id="monthly-search-kw" class="search-bar-only" placeholder="ASIN・商品名・注文番号で検索..." oninput="monthlyCurrentPage=1; renderMonthlyList();">
+
+      <div id="monthly-purchase" class="tab-content active"><div id="monthly-purchase-list"></div></div>
+      <div id="monthly-sales" class="tab-content"><div id="monthly-sales-list"></div></div>
+
+      <div id="monthly-pagination" class="pagination" style="display:none;">
+        <button class="page-btn" id="monthly-btn-prev" onclick="monthlyCurrentPage--; renderMonthlyList();">◀ 戻る</button>
+        <span class="page-info" id="monthly-page-info">1 / 1</span>
+        <button class="page-btn" id="monthly-btn-next" onclick="monthlyCurrentPage++; renderMonthlyList();">次へ ▶</button>
+      </div>
+    </div>
+  </div>
+  <div id="expenseModal" class="modal">
+    <div class="modal-content">
+      <h3 style="color:#e53e3e;">💸 経費サクッと入力</h3>
+      
+      <div style="display:flex; gap:8px;">
+        <div style="flex:1;">
+          <label>発生月 (必須)</label>
+          <input type="text" id="expMonth" placeholder="2026/06">
+        </div>
+        <div style="flex:1;">
+          <label>日付</label>
+          <input type="text" id="expDate" placeholder="2026/06/12">
+        </div>
+      </div>
+
+      <label>経費の種類</label>
+      <select id="expTypeSelect" onchange="toggleExpTypeInput()" style="width:100%; padding:10px; margin-top:4px; border:1px solid #ccc; border-radius:6px; font-size:14px; background:#fff; outline:none;">
+        <option value="梱包資材">📦 梱包資材</option>
+        <option value="ツール代">💻 ツール代</option>
+        <option value="その他">✍️ その他 (手入力)</option>
+      </select>
+      
+      <input type="text" id="expTypeCustom" placeholder="経費の種類を入力してな" style="display:none; width:100%; padding:10px; margin-top:8px; border:1px solid #e53e3e; border-radius:6px; font-size:14px; box-sizing:border-box; outline:none;">
+
+      <label>金額 (必須)</label>
+      <input type="number" id="expAmount" placeholder="例: 1500" style="font-size:18px; font-weight:bold; color:#e53e3e;">
+
+      <label>メモ (任意)</label>
+      <input type="text" id="expMemo" placeholder="段ボール50枚 など">
+
+      <div class="modal-actions" style="margin-top:24px;">
+        <button style="background:#e2e8f0; color:#4a5568;" onclick="closeExpenseModal()">キャンセル</button>
+        <button id="expSubmitBtn" style="background:#e53e3e; color:white; font-size:14px;" onclick="submitExpense()">🚀 経費を登録</button>
+      </div>
+    </div>
+  </div>
+  <div id="configModal" class="modal">
+    <div class="modal-content">
+      <h3>⚙️ アプリ基本設定</h3>
+      <label>Keepa APIキー</label>
+      <input type="text" id="cfgKeepa" placeholder="あなたのKeepaAPIキー">
+      
+      <label>SearchHub : ManagerのURL</label>
+      <input type="url" id="cfgSsUrl" placeholder="https://docs.google.com/spreadsheets/...">
+      
+      <label>SearchHub : ResearcherのURL</label>
+      <input type="url" id="cfgResearcherUrl" placeholder="https://docs.google.com/spreadsheets/...">
+      
+      <div style="border-top:1px dashed #ccc; margin-top:15px; padding-top:5px;"></div>
+      <label>SearchHub Sniper 極のGASURL</label>
+      <input type="url" id="cfgSniperUrl" placeholder="https://script.google.com/macros/.../exec">
+      <label>SearchHub : WatcherのGASURL</label>
+      <input type="url" id="cfg10SiteUrl" placeholder="https://script.google.com/macros/.../exec">
+      <div style="border-top:1px dashed #ccc; margin-top:15px; padding-top:5px;"></div>
+      <label>AmazonセラーID</label>
+      <input type="text" id="cfgSellerId" placeholder="A1234567890XYZなど">
+      
+      <button onclick="enablePushNotifications(this)" style="width:100%; background:#ff9900; color:white; padding:10px; border:none; border-radius:6px; font-weight:bold; margin-top:10px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">🔔 スマホに通知を送る許可をする</button>
+      <div class="modal-actions">
+        <button style="background:#e2e8f0; color:#4a5568;" onclick="closeConfig()">閉じる</button>
+        <button style="background:#1a365d; color:white;" onclick="saveConfig()">設定を保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmRegisterModal" class="modal">
+    <div class="modal-content">
+      <h3>🚀 仕入れ登録の最終確認</h3>
+      <div id="confirmDetails" style="font-size:13px; color:#4a5568; margin-bottom:12px; line-height:1.6; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
+        </div>
+
+      <label>仕入れ先を選択 (情報sheetから取得)</label>
+      <select id="supplierSelect" style="width:100%; padding:10px; margin-top:4px; margin-bottom:12px; border:1px solid #ccc; border-radius:6px; font-size:14px; background:#fff; outline:none;">
+        <option value="">🔄 リストを読込中...</option>
+      </select>
+
+      <label>購入URL (E列)</label>
+      <input type="text" id="regPurchaseUrl" placeholder="https://..." oninput="autoExtractId()" style="width:100%; padding:10px; margin-top:4px; margin-bottom:8px; border:1px solid #ccc; border-radius:6px; font-size:14px; background:#fff; outline:none; box-sizing:border-box;">
+
+      <label>商品ID (F列)</label>
+      <input type="text" id="regPurchaseId" placeholder="m123456789など" style="width:100%; padding:10px; margin-top:4px; margin-bottom:16px; border:1px solid #ccc; border-radius:6px; font-size:14px; background:#fff; outline:none; box-sizing:border-box;">
+      <div class="modal-actions">
+        <button style="background:#e2e8f0; color:#4a5568;" onclick="closeConfirmModal()">キャンセル</button>
+        <button id="executeRegBtn" style="background:#1a365d; color:white;" onclick="executeRegistration()">この内容で登録</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const AppStorage = {
+      get: function(key, def) { try { return localStorage.getItem(key) || def; } catch(e) { return def; } },
+      set: function(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+    };
+
+    const TempStorage = {
+      get: function(key, def) { try { return sessionStorage.getItem(key) || def; } catch(e) { return def; } },
+      set: function(key, val) { try { sessionStorage.setItem(key, val); } catch(e) {} }
+    };
+
+    const siteKeyMap = {
+      'sniper-mercari': 'Sメルカリ', 'sniper-paypay': 'Sヤフフリ', 'sniper-offmall': 'Sオフモ',
+      'watcher-mercari': 'メルカリ', 'watcher-paypay': 'ヤフーフリマ', 'watcher-yahoo': 'ヤフオク',
+      'watcher-offmall': 'オフモール', 'watcher-2nd': 'セカストオンライン', 'watcher-rakuma': 'ラクマ',
+      'watcher-surugaya': '駿河屋', 'watcher-yshopping': 'ヤフショ', 'watcher-aupay': 'au PAY', 'watcher-trefac': 'トレファク'
+    };
+
+    const sniperOrder = ['sniper-mercari', 'sniper-paypay', 'sniper-offmall'];
+    const watcherOrder = ['watcher-mercari', 'watcher-paypay', 'watcher-yahoo', 'watcher-offmall', 'watcher-2nd', 'watcher-rakuma', 'watcher-surugaya', 'watcher-yshopping', 'watcher-aupay', 'watcher-trefac'];
+    const monthlyOrder = ['monthly-purchase', 'monthly-sales']; 
+    
+    // 🚀 ステップ②: グラフタブの左右スワイプ対応のための配列
+    const homeOrder = ['turnover', 'purchase', 'sales']; 
+
+    let currentActiveView = 'view-home';
+    let globalViewedLinks = [];
+    let globalHistoryData = {};
+    let globalInventoryData = [];
+    let invCurrentPage = 1;
+    const ITEMS_PER_PAGE = 20;
+    let globalMonthlyData = { purchase: [], sales: [] };
+    let monthlyCurrentPage = 1;
+    let currentMonthlyTab = 'monthly-purchase';
+   
+    let globalAllOwnInventory = {}; // 💡 アプリが在庫を記憶する箱
+
+    // 💡 アプリの裏側でこっそり全在庫リストを取得する関数
+    async function loadOwnInventoryBackground() {
+      const ssUrl = AppStorage.get("sh_ssurl", "");
+      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+      if (!ssUrl || !targetGasUrl) return;
+      
+      try {
+        const res = await fetch(targetGasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ command: 'getAllOwnInventoryCounts', ssUrl: ssUrl })
+        });
+        const json = await res.json();
+        if (json.success) {
+          globalAllOwnInventory = json.counts; // 🚀 取得したリストを箱にぶち込む！
+        }
+      } catch(e) {
+        console.log("裏側での在庫データ取得に失敗しました", e);
+      }
+    }
+
+    let homeChartInstance = null;
+    let currentHomeMode = 'turnover';
+    let currentHomeMonth = '';
+    let homeData = {
+      availableMonths: [],
+      today: { dateStr: '--/--', buyAmount: 0, estSales: 0, buyCount: 0, estProfit: 0, profitRate: 0, roi: 0 },
+      turnover: { value: 0, inventory: 0 },
+      monthly: {}
+    };
+
+    const chartConfig = {
+      purchase: { labelBar: '日別 仕入額', labelLine: '累計 想定利益', barColor: '#008296', lineColor: '#E47911' },
+      sales: { labelBar: '日別 販売額', labelLine: '累計 確定利益', barColor: '#008296', lineColor: '#38a169' }
+    };
+
+    async function fetchDashboardData() {
+  const ssUrl = AppStorage.get("sh_ssurl", "");
+  const resUrl = AppStorage.get("sh_researcher_url", ""); 
+  
+  let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+  if (!ssUrl || !targetGasUrl) return;
+
+  try {
+    const res = await fetch(targetGasUrl, { 
+      method: 'POST', 
+      body: JSON.stringify({ command: 'getDashboardData', ssUrl: ssUrl, researcherUrl: resUrl }) 
+    });
+    const json = await res.json();
+    if (json.success && json.data) {
+      homeData = json.data;
+      if (homeData.availableMonths.length > 0) {
+        currentHomeMonth = homeData.availableMonths[0];
+        
+        const monthArea = document.getElementById('homeMonthTabsArea');
+        monthArea.innerHTML = '';
+        homeData.availableMonths.forEach(m => {
+          const btn = document.createElement('button');
+          btn.className = `home-month-btn ${m === currentHomeMonth ? 'active' : ''}`;
+          btn.innerText = m;
+          btn.onclick = function() { switchHomeMonth(m, this); };
+          monthArea.appendChild(btn);
+        });
+      }
+
+      const dashDotRes = document.getElementById('dash-dot-researcher');
+      if (dashDotRes) {
+        if (homeData.researcherActive === true) {
+          dashDotRes.classList.add('active');
+        } else {
+          dashDotRes.classList.remove('active');
+        }
+      }
+
+      updateHomeView();
+    }
+  } catch(err) {
+    console.error("Dashboard fetch error", err);
+  }
+}
+
+    function updateHomeView() {
+      const contentArea = document.getElementById('homeGraphContent');
+      const monthArea = document.getElementById('homeMonthTabsArea');
+      
+      if (currentHomeMode === 'turnover') {
+        monthArea.style.display = 'none';
+        contentArea.innerHTML = `
+          <div class="turnover-container">
+            <div class="metrics-list">
+              <div style="font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #008296;">本日(${homeData.today.dateStr})の仕入れ</div>
+              <div class="metric-item"><span>仕入れ額</span><span class="metric-value">¥${homeData.today.buyAmount.toLocaleString()}</span></div>
+              <div class="metric-item"><span>想定販売額</span><span class="metric-value">¥${homeData.today.estSales.toLocaleString()}</span></div>
+              <div class="metric-item"><span>仕入れ個数</span><span class="metric-value">${homeData.today.buyCount} 個</span></div>
+              <div class="metric-item"><span>想定利益額</span><span class="metric-value profit">¥${homeData.today.estProfit.toLocaleString()}</span></div>
+              <div class="metric-item"><span>利益率</span><span class="metric-value">${homeData.today.profitRate} %</span></div>
+              <div class="metric-item"><span>ROI</span><span class="metric-value">${homeData.today.roi} %</span></div>
+            </div>
+            <div class="chart-box">
+              <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="circle-base" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="circle-over" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div class="percentage">
+                <span id="turnoverText" style="font-size: 28px; color: #0f1111; margin:0;">0%</span>
+                <span>回転率</span>
+              </div>
+            </div>
+          </div>
+        `;
+        setTimeout(() => { drawTurnoverChart(homeData.turnover.value); }, 50);
+      } else {
+        monthArea.style.display = 'flex';
+        const config = chartConfig[currentHomeMode];
+        const monthDataObj = homeData.monthly[currentHomeMonth] ? homeData.monthly[currentHomeMonth][currentHomeMode] : null;
+        
+        if (!monthDataObj) {
+           contentArea.innerHTML = `<div style="text-align:center; padding:30px; color:#a0aec0; font-size:12px;">データがありません</div>`;
+           return;
+        }
+
+        const marginStr = currentHomeMode === 'purchase' 
+  ? (monthDataObj.totalEstSales > 0 ? Math.round((monthDataObj.totalLine / monthDataObj.totalEstSales) * 100) : 0)
+  : (monthDataObj.totalBar > 0 ? Math.round((monthDataObj.totalLine / monthDataObj.totalBar) * 100) : 0);
+        const profitLabel = currentHomeMode === 'purchase' ? '想定利益' : '確定利益';
+        const marginLabel = currentHomeMode === 'purchase' ? '想定利益率' : '利益率';
+
+        contentArea.innerHTML = `
+          <div class="summary-header">
+            <div class="summary-date">${currentHomeMonth.split('/')[1]}月${monthDataObj.lastDataDay}日 時点</div>
+            <div class="summary-values">
+              <div class="summary-box">
+                <div class="summary-label">合計 ${currentHomeMode==='purchase'?'仕入':'販売'}</div>
+                <div class="summary-value">¥${monthDataObj.totalBar.toLocaleString()}</div>
+              </div>
+              <div class="summary-box">
+                <div class="summary-label">${profitLabel}</div>
+                <div class="summary-value highlight">¥${monthDataObj.totalLine.toLocaleString()}</div>
+              </div>
+              <div class="summary-box">
+                <div class="summary-label">${marginLabel}</div>
+                <div class="summary-value" style="color:#008296;">${marginStr}%</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="mainChart"></canvas>
+          </div>
+        `;
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        const days = Array.from({length: monthDataObj.bars.length}, (_, i) => i + 1);
+        if (homeChartInstance) { homeChartInstance.destroy(); }
+        homeChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: days,
+            datasets: [
+              { type: 'line', label: config.labelLine, data: monthDataObj.lines, borderColor: config.lineColor, backgroundColor: config.lineColor, yAxisID: 'y1', pointRadius: 1, tension: 0.2, borderWidth: 2, order: 1, spanGaps: true },
+              { type: 'bar', label: config.labelBar, data: monthDataObj.bars, backgroundColor: config.barColor, yAxisID: 'y', borderRadius: 2, order: 2 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { maxTicksLimit: 15, font: { size: 10 } } },
+              y: { position: 'left', beginAtZero: true, grid: { color: '#f0f2f2' }, ticks: { color: config.barColor, font: { size: 10 }, callback: v => '¥'+v.toLocaleString() }, title: { display: true, text: config.labelBar, color: config.barColor, font: { size: 10, weight: 'bold' } } },
+              y1: { position: 'right', beginAtZero: true, grid: { display: false }, ticks: { color: config.lineColor, font: { size: 10 }, callback: v => '¥'+v.toLocaleString() }, title: { display: true, text: config.labelLine, color: config.lineColor, font: { size: 10, weight: 'bold' } } }
+            }
+          }
+        });
+      }
+    }
+
+    function switchHomeTab(mode, btn) {
+      document.querySelectorAll('.home-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentHomeMode = mode;
+      updateHomeView();
+    }
+
+    function switchHomeMonth(month, btn) {
+      document.querySelectorAll('.home-month-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentHomeMonth = month;
+      updateHomeView();
+    }
+
+    function drawTurnoverChart(percent) {
+      const baseCircle = document.querySelector('.circle-base');
+      const overCircle = document.querySelector('.circle-over');
+      const textLabel = document.getElementById('turnoverText');
+      if(!baseCircle) return;
+      textLabel.innerText = percent + '%';
+      if (percent <= 100) {
+          baseCircle.setAttribute('stroke-dasharray', `${percent}, 100`);
+          overCircle.setAttribute('stroke-dasharray', `0, 100`);
+      } else {
+          baseCircle.setAttribute('stroke-dasharray', `100, 100`);
+          let overVal = percent % 100;
+          if (overVal === 0) overVal = 100;
+          overCircle.setAttribute('stroke-dasharray', `${overVal}, 100`);
+      }
+    }
+
+    function hideLoader() {
+      const loader = document.getElementById("loader");
+      if (loader && loader.style.display !== "none") {
+        
+        document.body.style.backgroundColor = "#f0f2f5"; 
+        loader.style.opacity = "0"; 
+        
+        setTimeout(() => { 
+          loader.style.display = "none"; 
+        }, 500);
+      }
+    }
+
+    let viewHistory = ['view-home'];
+
+    function goBack() {
+      if (viewHistory.length > 1) {
+        viewHistory.pop();
+        const prev = viewHistory[viewHistory.length - 1];
+        openView(prev, true);
+        
+        setTimeout(() => { 
+          const savedScroll = TempStorage.get("sh_scroll_pos_" + prev, 0);
+          window.scrollTo(0, parseInt(savedScroll, 10)); 
+        }, 50);
+      } else {
+        openView('view-home');
+      }
+    }
+
+    function openView(viewId, isBack = false) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+      
+      if (!isBack && currentActiveView) {
+         TempStorage.set("sh_scroll_pos_" + currentActiveView, window.scrollY);
+      }
+      
+      currentActiveView = viewId;
+      
+      if (!isBack) {
+        if (viewHistory[viewHistory.length - 1] !== viewId) {
+          viewHistory.push(viewId);
+        }
+      }
+      if (viewId === 'view-home') viewHistory = ['view-home'];
+      TempStorage.set("sh_view_history", JSON.stringify(viewHistory));
+
+      const titleEl = document.getElementById('headerTitle');
+      const backBtn = document.getElementById('backBtn');
+      
+      if(viewId === 'view-home') {
+        backBtn.style.display = 'none';
+        titleEl.innerText = 'SearchHub Mobile'; 
+      } else {
+        backBtn.style.display = 'flex';
+        if(viewId === 'view-sniper') titleEl.innerText = 'SearchHub Sniper';
+        else if(viewId === 'view-watcher') titleEl.innerText = 'SearchHub Watcher';
+        else if(viewId === 'view-amazon') titleEl.innerText = 'Amazon リサーチ';
+        else if(viewId === 'view-price') titleEl.innerText = '価格改定';
+        else if(viewId === 'view-history') titleEl.innerText = '販売履歴リサーチ';
+        else if(viewId === 'view-monthly') titleEl.innerText = '月別データ詳細'; 
+        else if(viewId === 'view-researcher') titleEl.innerText = 'Researcher精査';
+      }
+
+      if (viewId === 'view-price') {
+        if (globalInventoryData.length === 0) loadInventoryPrice(); else renderInventoryList();
+      }
+      if (viewId === 'view-monthly') {
+        if (globalMonthlyData.purchase.length === 0 && globalMonthlyData.sales.length === 0) loadMonthlyData(); else renderMonthlyData();
+      }
+      if (viewId === 'view-amazon' && !isBack) {
+        document.getElementById('amazonKw').value = '';
+        document.getElementById('amazonResult').style.display = 'none';
+        document.getElementById('amazonHistoryArea').style.display = 'block';
+        loadAmazonHistory();
+      }
+      
+      if (!isBack) {
+        window.scrollTo(0,0);
+      }
+      TempStorage.set("sh_last_view", viewId);
+    }
+
+    function recalcBadges() {
+      let totalSniper = 0; let totalWatcher = 0;
+      for (const [divId, gasSiteName] of Object.entries(siteKeyMap)) {
+        const container = document.getElementById(divId);
+        if(!container) continue;
+        const unreadCount = container.querySelectorAll('.card.is-new-item:not(.read-card)').length;
+        if (divId.startsWith('sniper-')) totalSniper += unreadCount;
+        if (divId.startsWith('watcher-')) totalWatcher += unreadCount;
+        const tabBtn = document.querySelector(`button[onclick*="'${divId}'"]`);
+        if (tabBtn) {
+          const dot = tabBtn.querySelector('.tab-dot');
+          if (dot) { if (unreadCount > 0) dot.classList.add('active'); else dot.classList.remove('active'); }
+        }
+      }
+      const dashDotSniper = document.getElementById('dash-dot-sniper');
+      const dashDotWatcher = document.getElementById('dash-dot-watcher');
+      if (totalSniper > 0) dashDotSniper.classList.add('active'); else dashDotSniper.classList.remove('active');
+      if (totalWatcher > 0) dashDotWatcher.classList.add('active'); else dashDotWatcher.classList.remove('active');
+
+      if ('setAppBadge' in navigator) {
+        if (totalSniper > 0) {
+          navigator.setAppBadge(totalSniper).catch(e => console.log('Badge error:', e));
+        } else {
+          navigator.clearAppBadge().catch(e => console.log('Badge clear error:', e));
+        }
+      }
+    }
+
+    function markAsRead(element) {
+      // 🌟 リンクをクリックした瞬間にスクロール位置を確実に記録！
+      TempStorage.set("sh_scroll_pos_" + currentActiveView, window.scrollY);
+      
+      const card = element.closest('.card');
+      if (card) { card.classList.add('read-card'); card.classList.remove('is-new-item'); }
+      const key = element.getAttribute('data-key');
+      if (key && !globalViewedLinks.includes(key)) {
+        globalViewedLinks.push(key);
+        if (globalViewedLinks.length > 500) globalViewedLinks.shift();
+        AppStorage.set("sh_viewed_links", JSON.stringify(globalViewedLinks));
+        
+        syncMarkAsReadToGAS([key]);
+      }
+      recalcBadges(); 
+    }
+
+    // 📦 まとめ送り用のダンボールと、出発タイマーを準備
+    let pendingReadKeys = [];
+    let syncTimer = null;
+
+    // 💡 新規追加：GASに既読データを送る通信専用関数
+    function syncMarkAsReadToGAS(newLinks) {
+      // 1. 今回クリックされたURLをダンボールに追加
+      if (newLinks && Array.isArray(newLinks)) {
+        newLinks.forEach(key => {
+          if (!pendingReadKeys.includes(key)) {
+            pendingReadKeys.push(key);
+          }
+        });
+      }
+
+      // 2. 出発待ちのタイマーを一旦リセット
+      if (syncTimer) {
+        clearTimeout(syncTimer);
+      }
+
+      // 3. 0.5秒（500ミリ秒）だけ待って、まとまった分を一気に送る！
+      syncTimer = setTimeout(() => {
+        if (pendingReadKeys.length === 0) return;
+
+        const linksToSend = [...pendingReadKeys];
+        pendingReadKeys = []; // 送る分だけ確定して箱を空にする
+
+        const urlSniper = AppStorage.get("sh_sniper_url", ""); 
+        const url10 = AppStorage.get("sh_tensite_url", "");
+        
+        const payload = JSON.stringify({ command: 'saveViewedLinks', links: linksToSend });
+
+        const options = { 
+          method: 'POST', 
+          mode: 'no-cors', 
+          // 🚨 keepalive は悪さするので完全に削除！
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: payload 
+        };
+
+        if (urlSniper) fetch(urlSniper, options).catch(e => {});
+        if (url10) fetch(url10, options).catch(e => {});
+      }, 500); // 👈 ここを 500（0.5秒）にするのが最強のバランスや！
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      try { globalViewedLinks = JSON.parse(AppStorage.get("sh_viewed_links", "[]")); } catch(e) { globalViewedLinks = []; }
+      try { viewHistory = JSON.parse(TempStorage.get("sh_view_history", '["view-home"]')); } catch(e) { viewHistory = ['view-home']; }
+      
+      updateDiscordBtnUI(AppStorage.get("sh_discord_toggle", "off"));
+      setupSwipe();
+      
+      document.getElementById('headerTitle').innerText = 'SearchHub Mobile';
+
+      const lastView = TempStorage.get("sh_last_view", "view-home");
+      openView(lastView, true);
+      
+      setTimeout(() => { 
+        const savedScroll = TempStorage.get("sh_scroll_pos_" + lastView, 0);
+        window.scrollTo(0, parseInt(savedScroll, 10)); 
+      }, 100);
+
+      const lastSniperTab = TempStorage.get("sh_last_sniper_tab", "sniper-mercari");
+      const sniperBtn = document.querySelector(`button[onclick*="'${lastSniperTab}'"]`);
+      if(sniperBtn) switchTab(lastSniperTab, sniperBtn, 'view-sniper');
+
+      const lastWatcherTab = TempStorage.get("sh_last_watcher_tab", "watcher-mercari");
+      const watcherBtn = document.querySelector(`button[onclick*="'${lastWatcherTab}'"]`);
+      if(watcherBtn) switchTab(lastWatcherTab, watcherBtn, 'view-watcher');
+
+      window.addEventListener('scroll', () => {
+        TempStorage.set("sh_scroll_pos_" + currentActiveView, window.scrollY);
+      }, {passive: true});
+
+      const urlSniper = AppStorage.get("sh_sniper_url", ""); const url10 = AppStorage.get("sh_tensite_url", "");
+      
+      if(urlSniper || url10) { fetchDashboardData(); }
+
+      loadOwnInventoryBackground(); // 👈 💡 これを追加！起動時に裏で在庫を取得！
+
+      setTimeout(() => { hideLoader(); }, 8000);
+      if(!urlSniper && !url10) {
+        setTimeout(() => { hideLoader(); document.getElementById("lastUpdate").innerText = "設定未完了"; openConfig(); }, 1500);
+      } else {
+        setTimeout(() => { syncPatrolData(); }, 800);
+      }
+    });
+
+    // 🚨 修正ポイント：戻ってきた時の「リスト自動再構築」をストップ！
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        // 🌟 戻ってきた瞬間に、保存しておいたスクロール位置へ「即座に」ピタッと戻す！
+        const savedScroll = TempStorage.get("sh_scroll_pos_" + currentActiveView, 0);
+        window.scrollTo(0, parseInt(savedScroll, 10));
+        
+        // 🚨 リストが再構築されてガタつく原因の自動同期（syncPatrolData）を停止！
+        // （更新したい時は「引っ張って更新」ボタンを使ってもらうようにする）
+        const urlSniper = AppStorage.get("sh_sniper_url", ""); 
+        const url10 = AppStorage.get("sh_tensite_url", "");
+        if (urlSniper || url10) {
+          fetchDashboardData(); // グラフや数字だけは裏でこっそり最新にしておく
+        }
+      }
+    });
+
+    async function syncPatrolData() {
+      // 🚨 ここにあった currentScrollY の取得処理を削除しました
+      document.getElementById("lastUpdate").innerText = "データ同期中...";
+      const urlSniper = AppStorage.get("sh_sniper_url", ""); const url10 = AppStorage.get("sh_tensite_url", "");
+      if(!urlSniper && !url10) return;
+      try {
+        const fetchPromises = []; const cacheBuster = "&t=" + new Date().getTime();
+        if (urlSniper) fetchPromises.push(fetch(urlSniper + "?command=mobileData" + cacheBuster).then(r => r.json()).catch(() => null)); else fetchPromises.push(Promise.resolve(null));
+        if (url10) fetchPromises.push(fetch(url10 + "?command=mobileData" + cacheBuster).then(r => r.json()).catch(() => null)); else fetchPromises.push(Promise.resolve(null));
+        const [resSniper, res10] = await Promise.all(fetchPromises);
+        hideLoader();
+
+        let sharedLinks = [];
+        if (resSniper && resSniper.viewedLinks) sharedLinks = sharedLinks.concat(resSniper.viewedLinks);
+        if (res10 && res10.viewedLinks) sharedLinks = sharedLinks.concat(res10.viewedLinks);
+        
+        if (sharedLinks.length > 0) {
+          globalViewedLinks = [...new Set([...globalViewedLinks, ...sharedLinks])].slice(-500);
+          AppStorage.set("sh_viewed_links", JSON.stringify(globalViewedLinks));
+        }
+
+        let mergedSites = {};
+        if (resSniper && !resSniper.error && resSniper.sites) {
+          mergedSites['Sメルカリ'] = resSniper.sites['メルカリ'] || []; mergedSites['Sヤフフリ'] = resSniper.sites['ヤフーフリマ'] || []; mergedSites['Sオフモ'] = resSniper.sites['オフモール'] || [];
+          if (resSniper.discordStatus) { AppStorage.set("sh_discord_toggle", resSniper.discordStatus); updateDiscordBtnUI(resSniper.discordStatus); }
+        }
+        if (res10 && !res10.error && res10.sites) Object.assign(mergedSites, res10.sites);
+        document.getElementById("lastUpdate").innerText = "最終更新: " + Utilities_formatDate(new Date());
+        globalHistoryData = mergedSites;
+        for (const [divId, gasSiteName] of Object.entries(siteKeyMap)) {
+          const container = document.getElementById(divId);
+          const currentItems = globalHistoryData[gasSiteName] || []; container.innerHTML = "";
+          if (currentItems.length === 0) {
+            container.innerHTML = '<div class="no-data">「' + gasSiteName.replace(/^S/, '') + '」に現在、新着・利益商品は見つかっていません。</div>';
+          } else {
+            currentItems.forEach(function(item) {
+              const uniqueKey = item.url + "_" + item.dateStr;
+              const isNew = item.status.includes("あり") && !item.status.includes("変化なし");
+              const isRead = globalViewedLinks.includes(uniqueKey);
+              const card = document.createElement("div");
+              card.className = "card" + (isRead ? " read-card" : "") + (isNew && !isRead ? " is-new-item" : "");
+              let htmlStr = '<div class="item-title"><a href="' + item.url + '" target="_blank" data-key="' + uniqueKey + '" onclick="markAsRead(this)">💎 ' + escapeHtml(item.title) + '</a></div>' +
+                '<div class="item-meta"><span class="status-tag">' + escapeHtml(item.status) + '</span><span class="price-tag">' + escapeHtml(item.price) + '</span></div>';
+              if (item.asin && item.asin !== "undefined") {
+                htmlStr += '<div style="margin-top:10px; border-top:1px dashed #e2e8f0; padding-top:10px;">' +
+                  '<button class="auto-asin-btn" data-key="' + uniqueKey + '" onclick="markAsRead(this); openView(\'view-amazon\'); jumpToAmazonResearch(\'' + escapeHtml(item.asin) + '\', \'' + escapeHtml(item.title) + '\')">' +
+                  '<span style="font-size:14px;">📦</span> ASIN: ' + escapeHtml(item.asin) + ' で一発解析</button></div>';
+              }
+              card.innerHTML = htmlStr; container.appendChild(card);
+            });
+          }
+        }
+        AppStorage.set("sh_history_data", JSON.stringify(globalHistoryData)); recalcBadges(); 
+        
+        // 🚨 ここにあった setTimeout による強制スクロール処理を削除しました
+
+      } catch(err) { document.getElementById("lastUpdate").innerText = "通信失敗"; hideLoader(); }
+    }
+
+    function forceReload(btn) { btn.style.transform = "rotate(360deg)"; setTimeout(() => btn.style.transform = "rotate(0deg)", 500); syncPatrolData(); fetchDashboardData(); }
+    
+    function openConfig() {
+      document.getElementById("cfgKeepa").value = AppStorage.get("sh_keepa", ""); 
+      document.getElementById("cfgSsUrl").value = AppStorage.get("sh_ssurl", "");
+      document.getElementById("cfgResearcherUrl").value = AppStorage.get("sh_researcher_url", ""); 
+      document.getElementById("cfgSniperUrl").value = AppStorage.get("sh_sniper_url", ""); 
+      document.getElementById("cfg10SiteUrl").value = AppStorage.get("sh_tensite_url", "");
+   document.getElementById("cfgSellerId").value = AppStorage.get("sh_seller_id", "");
+      document.getElementById("configModal").style.display = "flex";
+    }
+
+    function closeConfig() { document.getElementById("configModal").style.display = "none"; }
+    
+    function saveConfig() {
+      AppStorage.set("sh_keepa", document.getElementById("cfgKeepa").value.trim()); 
+      AppStorage.set("sh_ssurl", document.getElementById("cfgSsUrl").value.trim());
+      AppStorage.set("sh_researcher_url", document.getElementById("cfgResearcherUrl").value.trim()); 
+      AppStorage.set("sh_sniper_url", document.getElementById("cfgSniperUrl").value.trim()); 
+      AppStorage.set("sh_tensite_url", document.getElementById("cfg10SiteUrl").value.trim());
+   AppStorage.set("sh_seller_id", document.getElementById("cfgSellerId").value.trim());
+      closeConfig(); syncPatrolData(); fetchDashboardData();
+    }
+    
+    function updateDiscordBtnUI(status) {
+      const btn = document.getElementById("dcToggleBtn");
+      btn.className = status === "on" ? "header-btn discord-btn discord-on" : "header-btn discord-btn discord-off";
+    }
+    
+    async function toggleDiscord() {
+      const sniperUrl = AppStorage.get("sh_sniper_url", "");
+      if (!sniperUrl) return alert("⚙️設定画面から『S(スナイパー)側 GAS URL』を先に登録してな！");
+      let currentStatus = AppStorage.get("sh_discord_toggle", "off");
+      let nextStatus = currentStatus === "on" ? "off" : "on";
+      updateDiscordBtnUI(nextStatus);
+      try {
+        const res = await fetch(sniperUrl, { method: 'POST', body: JSON.stringify({ command: 'toggleDiscord', status: nextStatus }) });
+        const json = await res.json();
+        if (json.success) AppStorage.set("sh_discord_toggle", nextStatus);
+        else { updateDiscordBtnUI(currentStatus); alert("設定の同期に失敗したわ。"); }
+      } catch(e) { updateDiscordBtnUI(currentStatus); alert("通信エラーが発生しました。"); }
+    }
+    
+    // 🚀 ステップ②: グラフの左右スワイプ対応版 setupSwipe & swipeToTab
+    function setupSwipe() {
+      let touchStartX = 0; let touchStartY = 0;
+      const areas = [document.getElementById('content-sniper'), document.getElementById('content-watcher'), document.getElementById('content-monthly'), document.getElementById('view-home'), document.getElementById('view-amazon'), document.getElementById('view-history'), document.getElementById('view-price'), document.getElementById('view-researcher')];
+      
+      areas.forEach(contentArea => {
+        if(!contentArea) return;
+        contentArea.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }, {passive: true});
+        contentArea.addEventListener('touchend', function(e) {
+          const diffX = e.changedTouches[0].clientX - touchStartX; 
+          const diffY = e.changedTouches[0].clientY - touchStartY;
+          
+          if (Math.abs(diffX) > 50 && Math.abs(diffY) < 40) {
+            
+            // 🌟 修正：単一画面から右スワイプした時、「強制TOP」ではなく「1つ前に戻る(goBack)」にする！
+            if (diffX > 50 && (currentActiveView === 'view-amazon' || currentActiveView === 'view-history' || currentActiveView === 'view-price' || currentActiveView === 'view-researcher')) {
+              goBack(); return; 
+            }
+            
+            // 🔄 タブがある画面の処理
+            if (currentActiveView !== 'view-sniper' && currentActiveView !== 'view-watcher' && currentActiveView !== 'view-monthly' && currentActiveView !== 'view-home') return;
+            
+            let order, activeContentId;
+            if (currentActiveView === 'view-sniper') { order = sniperOrder; activeContentId = document.querySelector(`#view-sniper .tab-content.active`).id; }
+            else if (currentActiveView === 'view-watcher') { order = watcherOrder; activeContentId = document.querySelector(`#view-watcher .tab-content.active`).id; }
+            else if (currentActiveView === 'view-monthly') { order = monthlyOrder; activeContentId = currentMonthlyTab; }
+            else if (currentActiveView === 'view-home') { order = homeOrder; activeContentId = currentHomeMode; }
+            
+            let currentIndex = order.indexOf(activeContentId);
+
+            // 👉 右スワイプの処理
+            if (diffX > 50) {
+              // 🌟 修正：一番左のタブの時にさらに右スワイプした時も、「1つ前に戻る(goBack)」にする！
+              if (currentIndex === 0 && currentActiveView !== 'view-home') {
+                 goBack(); return; 
+              }
+              // それ以外なら、純粋に左のタブへ移動
+              if (currentIndex > 0) {
+                 swipeToTab(order[currentIndex - 1], currentActiveView);
+              }
+            } 
+            // 👈 左スワイプの処理
+            else if (diffX < 0) {
+              if (currentIndex < order.length - 1) {
+                 swipeToTab(order[currentIndex + 1], currentActiveView);
+              }
+            }
+          }
+        }, {passive: true});
+      });
+    }
+
+    function swipeToTab(targetId, viewId) {
+      if (viewId === 'view-monthly') {
+        const btn = document.getElementById("btn-" + targetId); if (btn) switchMonthlyTab(targetId, btn);
+      } else if (viewId === 'view-home') {
+        const btn = document.querySelector(`.home-tab-btn[onclick*="'${targetId}'"]`);
+        if (btn) switchHomeTab(targetId, btn);
+      } else {
+        const btn = document.querySelector(`button[onclick*="'${targetId}'"]`);
+        if (btn) { switchTab(targetId, btn, viewId); btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
+      }
+    }
+
+    function switchTab(targetId, btn, viewId) {
+      document.querySelectorAll(`#${viewId} .tab-content`).forEach(c => c.classList.remove('active'));
+      document.querySelectorAll(`#${viewId} .tab-btn`).forEach(b => b.classList.remove('active'));
+      document.getElementById(targetId).classList.add('active'); btn.classList.add('active');
+      if (viewId === 'view-sniper') TempStorage.set("sh_last_sniper_tab", targetId);
+      if (viewId === 'view-watcher') TempStorage.set("sh_last_watcher_tab", targetId);
+    }
+    function switchMonthlyTab(targetId, btn) {
+      document.querySelectorAll('#view-monthly .tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('#view-monthly .tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(targetId).classList.add('active'); btn.classList.add('active');
+      currentMonthlyTab = targetId; monthlyCurrentPage = 1; renderMonthlyData();
+    }
+    function Utilities_formatDate(date) {
+      const y = date.getFullYear(); const m = ('0' + (date.getMonth() + 1)).slice(-2);
+      const d = ('0' + date.getDate()).slice(-2); const h = ('0' + date.getHours()).slice(-2);
+      const min = ('0' + date.getMinutes()).slice(-2);
+      return `${y}/${m}/${d} ${h}:${min}`;
+    }
+    function escapeHtml(str) { if(!str) return ""; return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+    function openManager() { const url = AppStorage.get("sh_ssurl", ""); if (!url) { openConfig(); return alert("⚙️設定から販売管理シートのURLを設定してな！"); } window.open(url, "_blank"); }
+
+    async function searchHistory() {
+      const asin = document.getElementById('historyAsin').value.trim(); const resDiv = document.getElementById('historyResult');
+      if(!asin) { resDiv.innerHTML = '<div class="card" style="text-align:center; color:#e53e3e; font-weight:bold;">ASINを入力してください</div>'; return; }
+      const ssUrl = AppStorage.get("sh_ssurl", ""); let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+      if (!ssUrl || !targetGasUrl) { openConfig(); return alert("⚙️設定から『販売管理シートURL』と『GAS URL』を登録してな！"); }
+      resDiv.innerHTML = '<div class="loading-spinner">⌛ 台帳からすべての実績を抽出中...</div>';
+      try {
+        const res = await fetch(targetGasUrl, { method: 'POST', body: JSON.stringify({ command: 'findPastData', ssUrl: ssUrl, asin: asin }) });
+        const json = await res.json();
+        if (!json.success || !json.data || json.data.length === 0) { resDiv.innerHTML = '<div class="card" style="text-align:center; color:#a0aec0; padding:30px 10px;">販売実績が見つかりませんでした。</div>'; return; }
+        let html = "";
+        json.data.reverse().forEach(function(r) {
+          html += `<div class="card" style="border-left: 6px solid #34a853; margin-bottom: 12px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 6px; margin-bottom: 8px;"><span style="font-size: 13px; color: #666; font-weight: bold;">仕入日</span><span style="font-size: 15px; font-weight: bold; color: #333;">${r.date || '---'}</span></div>
+            
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 6px; margin-bottom: 8px;"><span style="font-size: 13px; color: #666; font-weight: bold;">販売日</span><span style="font-size: 15px; font-weight: bold; color: #333;">${r.saleDate || '---'}</span></div>
+
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 6px; margin-bottom: 8px;"><span style="font-size: 13px; color: #666; font-weight: bold;">販売額</span><span style="font-size: 16px; font-weight: bold; color: #333;">${Number(r.price || 0).toLocaleString()}円</span></div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding-bottom: 6px; margin-bottom: 8px;"><span style="font-size: 13px; color: #666; font-weight: bold;">仕入値</span><span style="font-size: 16px; font-weight: bold; color: #333;">${Number(r.siire || 0).toLocaleString()}円</span></div>
+            <div style="display: flex; justify-content: space-between; padding-top: 4px;"><span style="font-size: 13px; color: #666; font-weight: bold;">今回の利益</span><span style="font-size: 22px; font-weight: 900; color: #d93025;">${Number(r.profit || 0).toLocaleString()}円</span></div>
+          </div>`;
+        });
+        resDiv.innerHTML = html;
+      } catch(err) { resDiv.innerHTML = '<div class="card" style="text-align:center; color:#e53e3e; font-weight:bold;">❌ 通信エラーが発生しました</div>'; }
+    }
+
+    function jumpToAmazonResearch(asin, title) { document.getElementById("amazonKw").value = asin; window.scrollTo({ top: 0, behavior: 'smooth' }); runAmazonResearch(title); }
+    function copyAsin(asin) { if (asin && asin !== "B000000000") { navigator.clipboard.writeText(asin).then(() => { const icon = document.getElementById('copyIcon'); if(icon) { icon.className = "fas fa-check text-green-500 text-[12px] ml-1"; setTimeout(() => { icon.className = "far fa-copy text-gray-400 text-[12px] ml-1"; }, 1500); } }); } }
+    function searchAmazonKeyword() { let modelText = document.getElementById('itemModelText') ? document.getElementById('itemModelText').innerText.trim() : ''; if (!modelText || modelText === '-') modelText = document.getElementById('amazonKw').value.trim(); if (!modelText) return alert("検索するキーワードがありません。"); window.open(`https://www.google.com/search?q=${encodeURIComponent(modelText + ' amazon')}`, '_blank'); }
+
+// 🚀 Amazon履歴の読み込みと保存
+    function loadAmazonHistory() {
+      const histArea = document.getElementById('amazonHistoryArea');
+      if(!histArea) return;
+      let history = [];
+      try { history = JSON.parse(AppStorage.get("sh_amazon_history", "[]")); } catch(e) {}
+      if(history.length === 0) { histArea.innerHTML = ''; return; }
+      let html = '<div style="font-size:12px; font-weight:bold; color:#718096; margin-bottom:4px;">🕒 最近の検索履歴</div>';
+      history.forEach(item => {
+        let imgHtml = item.img ? `<div style="width:50px; height:50px; background:#fff; border:1px solid #eee; border-radius:6px; padding:2px; flex-shrink:0;"><img src="${item.img}" style="width:100%; height:100%; object-fit:contain;"></div>` : '<div style="width:50px; height:50px; background:#f8fafc; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:9px; color:#999; border:1px solid #eee;">No Img</div>';
+        html += `
+        <div onclick="document.getElementById('amazonKw').value='${item.kw}'; runAmazonResearch();" class="card" style="display:flex; gap:10px; align-items:center; padding:10px; margin-bottom:0; cursor:pointer; border-left:4px solid #4a5568;">
+          ${imgHtml}
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:11px; font-weight:bold; color:#1a365d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;">${escapeHtml(item.title)}</div>
+            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+              <span style="background:#e0f2fe; color:#0369a1; padding:2px 5px; border-radius:4px; font-size:9px; font-weight:bold;">${item.kw}</span>
+              <span style="border:1px solid ${item.rColor}; color:${item.rColor}; padding:1px 5px; border-radius:4px; font-size:9px; font-weight:bold;">${item.rank}</span>
+              <span style="background:#f0f4ff; color:#2c4c8f; border:1px solid #dbeafe; padding:1px 5px; border-radius:4px; font-size:9px; font-weight:bold;">中古 ${item.used}</span>
+            </div>
+          </div>
+        </div>`;
+      });
+      histArea.innerHTML = html;
+    }
+    
+    function saveAmazonHistory(data) {
+      let history = [];
+      try { history = JSON.parse(AppStorage.get("sh_amazon_history", "[]")); } catch(e) {}
+      history = history.filter(item => item.kw !== data.kw);
+      history.unshift(data);
+      if(history.length > 10) history = history.slice(0, 10);
+      AppStorage.set("sh_amazon_history", JSON.stringify(history));
+      loadAmazonHistory();
+    }
+    
+    async function runAmazonResearch(fallbackTitle) {
+      const kw = document.getElementById("amazonKw").value.trim(); const resView = document.getElementById("amazonResult"); const apiKey = AppStorage.get("sh_keepa", "");
+      if (!kw) return alert("キーワードかASINを入力してな！"); if (!apiKey) { openConfig(); return alert("⚙️設定からKeepaAPIキーを入力してな！"); }
+      resView.innerHTML = '<div class="loading-spinner">⌛ Keepa APIと高速通信・解析中...</div>';
+document.getElementById('amazonHistoryArea').style.display = 'none';
+      resView.style.display = 'block';
+      try {
+        let asin = kw;
+        if (!/^[A-Z0-9]{10}$/i.test(kw)) {
+          const searchRes = await fetch('https://api.keepa.com/search?key=' + apiKey + '&domain=5&type=product&term=' + encodeURIComponent(kw));
+          const searchJson = await searchRes.json();
+          if (!searchJson.products || searchJson.products.length === 0) { resView.innerHTML = '<div class="card" style="color:#e53e3e; text-align:center;">❌ 商品が見つかりませんでした。</div>'; return; }
+          asin = searchJson.products[0].asin;
+        }
+        const prodRes = await fetch('https://api.keepa.com/product?key=' + apiKey + '&domain=5&asin=' + asin + '&stats=90&buybox=1');
+        const prodJson = await prodRes.json();
+        const p = prodJson.products[0];
+        const productTitle = p.title || fallbackTitle || '不明'; const modelNum = p.model || '不明';
+        window.tmpTitle = productTitle;
+        window.tmpModel = modelNum;
+        let imgRaw = '';
+        if (p.images && p.images.length > 0) {
+          const firstImg = p.images[0]; imgRaw = (typeof firstImg === 'object') ? (firstImg.l || firstImg.m || firstImg.s) : firstImg;
+        } else if (p.imagesCSV) imgRaw = p.imagesCSV.split(',')[0];
+        let imageUrl = imgRaw ? (imgRaw.startsWith('http') ? imgRaw : 'https://images-na.ssl-images-amazon.com/images/I/' + imgRaw) : '';
+        const avgUsed = p.stats.avg90 && p.stats.avg90[2] !== -1 ? p.stats.avg90[2] : 0;
+        const minUsed = p.stats.current && p.stats.current[2] !== -1 ? p.stats.current[2] : 0;
+        
+        const referralFeePercent = p.referralFeePercentage || 10;
+        
+        let bbUsedPrice = 0;
+        if (p.stats) {
+          if (p.stats.buyBoxUsedPrice !== undefined && p.stats.buyBoxUsedPrice > 0) {
+            bbUsedPrice = p.stats.buyBoxUsedPrice + (p.stats.buyBoxUsedShipping > 0 ? p.stats.buyBoxUsedShipping : 0);
+          } else if (p.stats.buyBoxIsUsed === true) {
+            if (p.stats.current && p.stats.current[18] !== undefined && p.stats.current[18] !== -1) {
+              bbUsedPrice = p.stats.current[18];
+            } else if (p.stats.buyBoxPrice !== undefined && p.stats.buyBoxPrice > 0) {
+              bbUsedPrice = p.stats.buyBoxPrice + (p.stats.buyBoxShipping > 0 ? p.stats.buyBoxShipping : 0);
+            }
+          }
+        }
+        
+        // ★ カートのテキストを「情報なし」に変更
+        let bbValText = bbUsedPrice > 0 ? '¥' + bbUsedPrice.toLocaleString() : '情報なし';
+
+        // ★ Keepaの11番（中古出品者数）を正確に取得
+        const usedOffers = (p.stats.current && p.stats.current[12] !== -1) ? p.stats.current[12] : 0;
+        const usedCountAvg90 = (p.stats.avg90 && p.stats.avg90[12] !== -1) ? p.stats.avg90[12] : usedOffers;
+
+        const fbaFee = p.fbaFees ? (p.fbaFees.totalFee || p.fbaFees.pickAndPackFee || 430) : 430;
+        const drops = p.stats.salesRankDrops90 || 0; 
+        window.tmpFbaFee = fbaFee;
+        window.tmpFeePercent = referralFeePercent;
+        const mSales = Math.floor(drops / 3);
+
+        // 🚀 シートの「自分流ロジック（7点満点）」を計算
+        let score = 0;
+        if (mSales >= 10) score += 3;
+        else if (mSales >= 5) score += 2;
+        else if (mSales >= 3) score += 1;
+
+        if (drops >= 20) score += 2;
+        else if (drops >= 10) score += 1;
+
+        if (usedOffers >= 1 && usedOffers <= 2) score += 2;
+        else if (usedOffers >= 3 && usedOffers <= 5) score += 1;
+        else if (usedOffers >= 8) score -= 2;
+
+        // 🚨 減点ルールの適用
+        if (score >= 7) {
+          const isPriceDropping = minUsed < avgUsed; // 値崩れ判定
+          const isSellerIncreasing = usedOffers > usedCountAvg90; // ライバル急増判定
+          const isRecentStagnant = (p.stats.salesRankDrops30 || 0) === 0; // 直近30日の動きなし
+
+          if (isPriceDropping || isSellerIncreasing || isRecentStagnant) {
+            score -= 1; 
+          }
+        }
+
+        // 🏆 ランクの割り当てと色の設定
+        let rank = 'E', rColor = '#808080';
+        if (score >= 7 && drops >= 30) { rank = 'SR'; rColor = '#a855f7'; } // 紫
+        else if (score >= 7) { rank = 'S'; rColor = '#ff0000'; } // 赤
+        else if (score >= 5) { rank = 'A'; rColor = '#ff8c00'; } // オレンジ
+        else if (score >= 3) { rank = 'B'; rColor = '#32cd32'; } // 緑
+        else if (score === 2) { rank = 'C'; rColor = '#1e90ff'; } // 青
+        else if (score === 1) { rank = 'D'; rColor = '#808080'; } // グレー
+        
+        const sizeTier = fbaFee > 650 ? "大型" : "標準";
+        let imgHtml = '<div style="width:70px; height:70px; background:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#999; border:1px solid #eee;">No Img</div>';
+        if (imageUrl) imgHtml = `<div style="width:70px; height:70px; background:#fff; border:1px solid #eee; border-radius:8px; padding:4px; flex-shrink:0;"><img src="${imageUrl}" style="width:100%; height:100%; object-fit:contain;"></div>`;
+
+        // 🚀 【通信待ちゼロ！完全爆速版】自在庫（現在庫）の個数を計算するロジック
+        let ownInventoryCount = 0;
+        let targetAsin = String(asin).trim().toUpperCase();
+        
+        // 💡 アプリ起動時に裏で読み込んでおいたリストの箱から、一瞬で取り出すだけ！
+        if (globalAllOwnInventory && globalAllOwnInventory[targetAsin]) {
+          ownInventoryCount = globalAllOwnInventory[targetAsin];
+        }
+
+        // ★ 規制確認ボタンを移動し、左側の隙間を調整
+        resView.innerHTML = `
+          <div class="card" style="display:flex; gap:12px; align-items:flex-start; margin-bottom:4px; padding-bottom:8px;">
+            ${imgHtml}
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-size:11px; color:#555; font-weight:bold; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">型番: <span id="itemModelText" style="color:#000;">${modelNum !== '不明' ? modelNum : productTitle.substring(0,30)+'...'}</span></div>
+              <div style="display:flex; align-items:center; gap:4px; margin-bottom:6px; cursor:pointer;" onclick="copyAsin('${asin}')">
+                <span style="font-size:11px; font-weight:bold; color:#666;">ASIN:</span>
+                <span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">${asin}</span>
+                <i class="far fa-copy text-gray-400 text-[12px] ml-1" id="copyIcon"></i>
+              </div>
+              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+                <span class="badge" style="border:1px solid ${rColor}; color:${rColor}; padding:3px 8px;">${rank}ランク</span>
+                <span class="badge" style="background:${sizeTier==='大型'?'#e53e3e':'#07A27B'}; color:white; padding:3px 8px;">${sizeTier}</span>
+                
+                <a href="https://sellercentral.amazon.co.jp/product-search/search?q=${asin}" target="_blank" style="background:#e53e3e; color:#fff; text-decoration:none; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.15);">規制確認</a>
+                
+                <button onclick="openView('view-history'); document.getElementById('historyAsin').value='${asin}'; searchHistory();" style="background:#4285f4; color:white; border:none; padding:3px 8px; border-radius:4px; font-weight:bold; font-size:10px; margin-left:4px; cursor:pointer;"><i class="fas fa-history"></i> 販売履歴リサーチ</button>
+              </div>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; align-items:stretch; gap:6px; flex-shrink:0; width:55px;">
+              <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f0f4ff; border:1px solid #dbeafe; padding:6px 4px; border-radius:8px;">
+                <span style="font-size:10px; color:#4a72b2; font-weight:bold; margin-bottom:2px;">中古出品</span>
+                <span style="font-size:18px; font-weight:900; color:#2c4c8f; line-height:1;">${usedOffers}</span>
+              </div>
+              
+              <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:${ownInventoryCount > 0 ? '#fff5f5' : '#f0fff4'}; border:1px solid ${ownInventoryCount > 0 ? '#fed7d7' : '#c6f6d5'}; padding:6px 4px; border-radius:8px; box-shadow: ${ownInventoryCount > 0 ? '0 2px 4px rgba(229,62,62,0.2)' : 'none'};">
+                <span style="font-size:10px; color:${ownInventoryCount > 0 ? '#c53030' : '#2f855a'}; font-weight:bold; margin-bottom:2px;">自在庫</span>
+                <span style="font-size:18px; font-weight:900; color:${ownInventoryCount > 0 ? '#e53e3e' : '#22543d'}; line-height:1;">${ownInventoryCount}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 10px; color: #718096; text-align: right; margin-bottom: 6px; padding-right: 4px;">
+            ※Keepaの情報を元に表示しています
+          </div>
+
+          <div class="market-price-container" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:12px;">
+            <div class="market-price-card" style="background:#ebf8ff; border:1px solid #bee3f8; padding:8px 4px; border-radius:8px; text-align:center;">
+              <div style="font-size:10px; color:#2b6cb0; font-weight:bold; margin-bottom:2px;">平均(90)</div>
+              <div style="font-size:13px; font-weight:bold; color:#2c5282;">¥${avgUsed > 0 ? avgUsed.toLocaleString() : '0'}</div>
+            </div>
+            <div class="market-price-card" style="background:#fff5f5; border:1px solid #fed7d7; padding:8px 4px; border-radius:8px; text-align:center;">
+              <div style="font-size:10px; color:#c53030; font-weight:bold; margin-bottom:2px;">中古最安</div>
+              <div style="font-size:13px; font-weight:bold; color:#9b2c2c;">¥${minUsed > 0 ? minUsed.toLocaleString() : '0'}</div>
+            </div>
+            <div class="market-price-card" style="background:#f0fff4; border:1px solid #c6f6d5; padding:8px 4px; border-radius:8px; text-align:center;">
+              <div style="font-size:10px; color:#2f855a; font-weight:bold; margin-bottom:2px;">カート価格</div>
+              <div style="font-size:13px; font-weight:bold; color:#22543d;">${bbValText}</div>
+            </div>
+          </div>
+
+          <div class="calc-box">
+            <div class="calc-row"><span>仕入れ値</span><input type="number" id="bPrice" placeholder="0" onfocus="this.placeholder=''" onblur="this.placeholder='0'"></div>
+            <div class="calc-row"><span>経費/送料</span><input type="number" id="ePrice" placeholder="0" onfocus="this.placeholder=''" onblur="this.placeholder='0'"></div>
+            <div class="calc-row"><span>販売価格</span><input type="number" id="sPrice" value="${minUsed}"></div>
+            <div style="border-top:1px solid #555; margin:12px 0 8px 0; padding-top:8px; font-size:12px; color:#aaa;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>販売手数料 (${referralFeePercent}%)</span><span id="resComm">--</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>FBA手数料</span><span>-¥${fbaFee.toLocaleString()}</span></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:14px; color:#90cdf4;"><span>入金目安</span><span id="resNyukin">--</span></div>
+            <div style="display:flex; justify-content:space-between; font-size:18px; color:#48bb78;"><span>想定利益</span><span id="resProfit">--</span></div>
+          </div>
+          <button class="register-btn" id="regBtn" onclick="sendToManager('${asin}')" style="margin-bottom:12px;">🚀 SearchHub : Managerへ仕入れ登録</button>
+          
+          
+
+          <div class="grid-3">
+            <a href="https://keepa.com/#!product/5-${asin}" target="_blank" class="btn-link" style="background:#55a676;">Keepa</a>
+            <button onclick="searchAmazonKeyword()" class="btn-link" style="background:#3f51b5; border:none;">検索</button>
+            <a href="https://www.amazon.co.jp/dp/${asin}" target="_blank" class="btn-link" style="background:#f7941d;">Amazon</a>
+          </div>`;
+          
+        const updateCalc = function() {
+          const sPrice = parseInt(document.getElementById('sPrice').value) || 0;
+          const bPrice = parseInt(document.getElementById('bPrice').value) || 0;
+          const ePrice = parseInt(document.getElementById('ePrice').value) || 0;
+          const comm = Math.floor(sPrice * (referralFeePercent / 100)); 
+          const nyukin = sPrice - comm - fbaFee; 
+          const profit = nyukin - bPrice - ePrice;
+          const margin = sPrice > 0 ? Math.floor((profit / sPrice) * 100) : 0;
+          document.getElementById('resComm').innerText = '-¥' + comm.toLocaleString(); 
+          document.getElementById('resNyukin').innerText = '¥' + nyukin.toLocaleString();
+          document.getElementById('resProfit').innerText = '¥' + profit.toLocaleString() + ' (' + margin + '%)'; 
+          document.getElementById('resProfit').style.color = profit >= 0 ? '#48bb78' : '#e53e3e';
+        };
+        ['sPrice', 'bPrice', 'ePrice'].forEach(id => { document.getElementById(id).addEventListener('input', updateCalc); });
+        updateCalc();
+        
+        // 🚀 解析成功時に履歴に保存！
+saveAmazonHistory({ kw: asin, title: productTitle, img: imageUrl, rank: rank, rColor: rColor, used: usedOffers });
+
+      } catch (err) { resView.innerHTML = '<div class="card" style="color:#e53e3e; text-align:center; font-weight:bold;">❌ 解析エラーが発生しました</div>'; }
+    }
+    
+    let pendingRegData = {};
+
+    window.sendToManager = function(asin) {
+      const bPrice = document.getElementById("bPrice").value || 0;
+      const ePrice = document.getElementById("ePrice").value || 0;
+      const sPrice = document.getElementById("sPrice").value || 0;
+
+      pendingRegData = { 
+        asin: asin, 
+        buyPrice: bPrice, 
+        shipping: ePrice, 
+        sellPrice: sPrice,
+        title: window.tmpTitle || "",
+        model: window.tmpModel || "",
+        // 👇 この2行を追加！（GASにFBA料と手数料の数字を送る）
+        fbaFee: window.tmpFbaFee || 0,
+        fee: Math.floor(sPrice * ((window.tmpFeePercent || 10) / 100))
+      };
+
+      document.getElementById("confirmDetails").innerHTML = 
+        `<b>ASIN:</b> ${asin}<br>
+         <b>仕入値:</b> ¥${Number(bPrice).toLocaleString()}<br>
+         <b>経費/送料:</b> ¥${Number(ePrice).toLocaleString()}<br>
+         <b>販売値:</b> ¥${Number(sPrice).toLocaleString()}`;
+
+document.getElementById("regPurchaseUrl").value = "";
+      document.getElementById("regPurchaseId").value = "";
+
+      document.getElementById("confirmRegisterModal").style.display = "flex";
+      fetchSupplierList();
+    }
+
+    window.closeConfirmModal = function() {
+      document.getElementById("confirmRegisterModal").style.display = "none";
+    }
+
+    async function fetchSupplierList() {
+      const select = document.getElementById("supplierSelect");
+      const ssUrl = AppStorage.get("sh_ssurl", "");
+      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+
+      if (!ssUrl || !targetGasUrl) {
+        select.innerHTML = '<option value="">⚠️ 設定URLが未登録です</option>'; return;
+      }
+      try {
+        const res = await fetch(targetGasUrl, { method: 'POST', body: JSON.stringify({ command: 'getSuppliers', ssUrl: ssUrl }) });
+        const json = await res.json();
+        if (json.success && json.data.length > 0) {
+          select.innerHTML = '<option value="">選択してください</option>';
+          json.data.forEach(sup => { select.innerHTML += `<option value="${sup}">${sup}</option>`; });
+        } else {
+          select.innerHTML = '<option value="">⚠️ リストが見つかりません</option>';
+        }
+      } catch(err) { select.innerHTML = '<option value="">❌ 通信エラー</option>'; }
+    }
+
+// 🚀 URLをペーストした瞬間、自動で商品IDを抜き出してF列に入力する魔法
+    window.autoExtractId = function() {
+      const url = document.getElementById("regPurchaseUrl").value.trim();
+      const idInput = document.getElementById("regPurchaseId");
+      
+      if (!url) return; // URLが空なら何もしない
+
+      let extractedId = "";
+      
+      // ① メルカリ特化（URLの中にmから始まる数字があれば絶対それ）
+      const mercariMatch = url.match(/(m\d{9,})/);
+      if (mercariMatch) {
+        extractedId = mercariMatch[1];
+      } else {
+        // ② その他のサイト（ヤフオク、ヤフフリなど）
+        // 大体のサイトは、URLの「/」で区切られた一番最後が商品IDになってる法則を利用！
+        try {
+          const urlObj = new URL(url);
+          const paths = urlObj.pathname.split('/').filter(p => p !== '');
+          if (paths.length > 0) {
+             let lastPart = paths[paths.length - 1];
+             lastPart = lastPart.split('?')[0]; // 「?」以降の余計なパラメーターをカット
+             extractedId = lastPart;
+          }
+        } catch(e) {
+          // URLの形式じゃない場合はスルー
+        }
+      }
+
+      // 抜き出したIDがあって、かつID欄がまだ空っぽの時だけ自動入力！
+      if (extractedId && !idInput.value) {
+        idInput.value = extractedId;
+      }
+    };
+
+    window.executeRegistration = async function() {
+      const supplier = document.getElementById("supplierSelect").value;
+      if (!supplier) { return alert("仕入れ先を選択してください！"); }
+
+      pendingRegData.supplier = supplier;
+
+      pendingRegData.purchaseUrl = document.getElementById("regPurchaseUrl").value.trim();
+      pendingRegData.purchaseId = document.getElementById("regPurchaseId").value.trim();
+
+      const btn = document.getElementById("executeRegBtn");
+      
+      // 👇 ここから修正：ResearcherのURLを取得
+      const ssUrl = AppStorage.get("sh_ssurl", "");
+      const researcherUrl = AppStorage.get("sh_researcher_url", ""); // 🌟 追加
+      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+
+      btn.disabled = true; btn.innerHTML = "⌛ 登録中...";
+      try {
+        const res = await fetch(targetGasUrl, { 
+          method: 'POST', 
+          // 👇 GASに送るボディ部分に researcherUrl を追加
+          body: JSON.stringify({ 
+            command: 'register', 
+            ssUrl: ssUrl, 
+            researcherUrl: researcherUrl, // 🌟 追加
+            data: pendingRegData 
+          }) 
+        });
+        const resJson = await res.json();
+        
+        if (resJson.success) {
+          btn.style.background = "#38a169"; btn.innerHTML = "✅ 登録完了！";
+          setTimeout(() => {
+            closeConfirmModal();
+            btn.style.background = "#1a365d"; btn.innerHTML = "この内容で登録"; btn.disabled = false;
+          }, 1500);
+        } else {
+          alert("登録失敗: " + resJson.message);
+          btn.disabled = false; btn.innerHTML = "🚀 再試行";
+        }
+      } catch(err) {
+        alert("通信エラーが発生しました");
+        btn.disabled = false; btn.innerHTML = "🚀 再試行";
+      }
+    }
+
+    window.calcSimProfit = function(id, cost, fbaFee, feePercent) {
+      const actualFeePercent = feePercent || 10; 
+      const priceInput = document.getElementById('sim_price_' + id); 
+      const profitSpan = document.getElementById('sim_profit_' + id);
+      const commSpan = document.getElementById('sim_comm_' + id); // 👈 これを足す
+      
+      if(!priceInput || !profitSpan) return;
+      
+      const price = Number(priceInput.value) || 0; 
+      const comm = Math.floor(price * (actualFeePercent / 100)); 
+      const profit = price - comm - fbaFee - cost; 
+      const margin = price > 0 ? Math.floor((profit / price) * 100) : 0;
+      profitSpan.style.color = profit >= 0 ? '#07A27B' : '#e53e3e'; 
+      profitSpan.innerText = '¥' + profit.toLocaleString() + ' (' + margin + '%)';
+
+      // 👇 この3行を足す
+      if(commSpan) {
+        commSpan.innerText = '手数料: ¥' + comm.toLocaleString() + ' / FBA: ¥' + fbaFee.toLocaleString();
+      }
+    };
+
+    async function loadInventoryPrice() {
+      const resDiv = document.getElementById('priceResult'); const countEl = document.getElementById('inventoryCount');
+      const ssUrl = AppStorage.get("sh_ssurl", ""); let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+      if (!ssUrl || !targetGasUrl) { openConfig(); resDiv.innerHTML = '<div class="card" style="text-align:center; padding:20px; color:#e53e3e; font-weight:bold;">⚙️設定を完了させてな！</div>'; return; }
+      resDiv.innerHTML = '<div class="loading-spinner">⌛ マネージャーシートから現役の在庫リストを抽出中...</div>'; countEl.innerText = "同期中...";
+      try {
+        const res = await fetch(targetGasUrl, { method: 'POST', body: JSON.stringify({ command: 'getInventoryPrice', ssUrl: ssUrl }) });
+        const json = await res.json();
+        if (!json.success || !json.data || json.data.length === 0) {
+          resDiv.innerHTML = '<div class="card" style="text-align:center; color:#a0aec0; padding:30px 10px;">現在、出品中の商品は見つかりませんでした。</div>';
+          countEl.innerText = "在庫: 0件"; globalInventoryData = []; document.getElementById('price-pagination').style.display = 'none'; return;
+        }
+        globalInventoryData = json.data; invCurrentPage = 1; renderInventoryList();
+      } catch(err) { resDiv.innerHTML = '<div class="card" style="text-align:center; color:#e53e3e; font-weight:bold;">❌ 取得に失敗しました</div>'; countEl.innerText = "通信失敗"; }
+    }
+
+    function renderInventoryList() {
+      const kw = document.getElementById('price-search-kw').value.toLowerCase().trim();
+      let filtered = globalInventoryData;
+      if (kw) filtered = globalInventoryData.filter(item => (item.title && item.title.toLowerCase().includes(kw)) || (item.asin && item.asin.toLowerCase().includes(kw)) || (item.sku && item.sku.toLowerCase().includes(kw)));
+      
+      const countEl = document.getElementById('inventoryCount'); countEl.innerText = `現在の商品: ${filtered.length}件`;
+      const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+      if (invCurrentPage > totalPages) invCurrentPage = totalPages; if (invCurrentPage < 1) invCurrentPage = 1;
+      const start = (invCurrentPage - 1) * ITEMS_PER_PAGE; const pageItems = filtered.slice(start, start + ITEMS_PER_PAGE);
+      const resDiv = document.getElementById('priceResult');
+      
+      if (pageItems.length === 0) { resDiv.innerHTML = '<div class="card" style="text-align:center; color:#a0aec0; padding:30px 10px;">見つかりませんでした。</div>'; document.getElementById('price-pagination').style.display = 'none'; return; }
+      
+      let html = "";
+      pageItems.forEach(function(item, index) {
+        const uniqueId = "inv_" + start + "_" + index; 
+        let badgeHtml = "";
+        if (item.daysText) {
+          let bColor = "#6d9eeb"; if (item.daysText.includes("30")) bColor = "#ea4335"; else if (item.daysText.includes("21")) bColor = "#fbbc04"; 
+          badgeHtml = `<span style="background:${bColor}; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:6px;">⚠️ ${item.daysText}</span>`;
+        }
+        let imgHtml = '<div style="width:65px; height:65px; background:#f8fafc; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#999; border:1px solid #eee;">No Img</div>';
+        if (item.img) imgHtml = `<div style="width:65px; height:65px; background:#fff; border:1px solid #eee; border-radius:8px; padding:2px; flex-shrink:0;"><img src="${item.img}" style="width:100%; height:100%; object-fit:contain;"></div>`;
+
+        let rivalsHtml = `<div style="font-size:10px; color:#a0aec0; margin-top:6px; padding:4px;">ライバル情報なし</div>`;
+        if (item.rivals && item.rivals.length > 0) {
+          rivalsHtml = `<select style="width:100%; padding:6px; font-size:11px; font-weight:bold; color:#1a365d; border:1px solid #cbd5e0; border-radius:4px; margin-top:8px; background:#fff; outline:none;">`;
+          rivalsHtml += `<option value="" disabled selected>ライバルセラー確認 (${item.rivals.length}件)</option>`;
+          item.rivals.forEach(r => { rivalsHtml += `<option>${escapeHtml(r)}</option>`; });
+          rivalsHtml += `</select>`;
+        }
+        
+        html += `
+        <div class="card" style="display:flex; flex-direction:column; padding:12px; margin-bottom:10px;">
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            ${imgHtml}
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:12px; font-weight:bold; color:#1a365d; line-height:1.3; margin-bottom:6px;">💎 ${escapeHtml(item.title)}</div>
+              <div style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:2px;">
+                <span style="background:#e0f2fe; color:#0369a1; padding:1px 5px; border-radius:4px; font-size:10px; font-weight:bold;">${item.asin}</span>
+                <span style="background:#e2e8f0; color:#4a5568; padding:1px 5px; border-radius:4px; font-size:10px; font-weight:bold;">${escapeHtml(item.condition)}</span>
+                ${badgeHtml}
+              </div>
+            </div>
+          </div>
+          ${rivalsHtml}
+          <div style="background:#f8fafc; padding:10px; border-radius:6px; margin-top:10px; border:1px solid #e2e8f0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:11px; font-weight:bold; color:#4a5568;">改定価格テスト:</span>
+              <div style="display:flex; align-items:center;">
+                <span style="font-size:14px; font-weight:bold; color:#333; margin-right:4px;">¥</span>
+                <input type="number" id="sim_price_${uniqueId}" value="${item.price > 0 ? item.price : ''}" placeholder="0" onfocus="this.placeholder=''" onblur="this.placeholder='0'" oninput="calcSimProfit('${uniqueId}', ${item.cost}, ${item.fbaFee}, ${item.feePercent || 10})" style="width:85px; text-align:right; padding:6px; border:1px solid #cbd5e0; border-radius:4px; font-size:15px; font-weight:900; color:#1a365d; outline:none;">
+              </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#718096; margin-bottom:8px;">
+  <span>仕入: ¥${Number(item.cost).toLocaleString()}</span>
+  <span id="sim_comm_${uniqueId}">手数料: ¥${Math.floor(Number(String(item.price || 0).replace(/,/g, '')) * (Number(item.feePercent) / 100)).toLocaleString()} / FBA: ¥${Number(item.fbaFee).toLocaleString()}</span>
+</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px dashed #cbd5e0; padding-top:8px;">
+              <span style="font-size:11px; font-weight:bold; color:#4a5568;">手残り利益:</span>
+              <span id="sim_profit_${uniqueId}" style="font-size:16px; font-weight:900; color:#07A27B;">計算中...</span>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+            <a href="https://keepa.com/#!product/5-${item.asin}" target="_blank" style="background:#55a676; color:white; text-decoration:none; padding:8px 12px; border-radius:6px; font-size:11px; font-weight:bold; display:flex; align-items:center; gap:4px;"><i class="fas fa-chart-line"></i> Keepa</a>
+            <a href="https://www.amazon.co.jp/dp/${item.asin}" target="_blank" style="background:#f7941d; color:white; text-decoration:none; padding:8px 12px; border-radius:6px; font-size:11px; font-weight:bold; display:flex; align-items:center; gap:4px;"><i class="fab fa-amazon"></i> カタログ</a>
+            <a href="https://sellercentral.amazon.co.jp/myinventory/inventory?searchTerm=${item.asin}" target="_blank" style="background:#e53e3e; color:white; text-decoration:none; padding:8px 12px; border-radius:6px; font-size:11px; font-weight:bold; display:flex; align-items:center; gap:4px;"><i class="fas fa-edit"></i> セラセン改定へ</a>
+          </div>
+        </div>`;
+      });
+      resDiv.innerHTML = html;
+      
+      pageItems.forEach(function(item, index) { calcSimProfit("inv_" + start + "_" + index, item.cost, item.fbaFee, item.feePercent || 10); });
+      
+      document.getElementById('price-page-info').innerText = `${invCurrentPage} / ${totalPages} ページ`;
+      document.getElementById('price-btn-prev').disabled = (invCurrentPage === 1);
+      document.getElementById('price-btn-next').disabled = (invCurrentPage === totalPages);
+      document.getElementById('price-pagination').style.display = (totalPages > 1) ? 'flex' : 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function loadMonthlyData() {
+      const ssUrl = AppStorage.get("sh_ssurl", "");
+      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+      if (!ssUrl || !targetGasUrl) { openConfig(); return alert("⚙️設定から『販売管理シートURL』と『GAS URL』を登録してな！"); }
+      document.getElementById('monthly-summary').innerHTML = '<div class="loading-spinner">⌛ 最新の月別データを集計中...</div>';
+      try {
+        const res = await fetch(targetGasUrl, { method: 'POST', body: JSON.stringify({ command: 'getMonthlyData', ssUrl: ssUrl }) });
+        const json = await res.json();
+        if (!json.success) { document.getElementById('monthly-summary').innerHTML = '<div class="card" style="color:red; text-align:center;">エラー: ' + json.message + '</div>'; return; }
+        globalMonthlyData = json.data;
+        let allMonths = new Set();
+        globalMonthlyData.purchase.forEach(d => allMonths.add(d.month)); globalMonthlyData.sales.forEach(d => allMonths.add(d.month));
+        let monthArr = Array.from(allMonths).sort((a,b) => b.localeCompare(a));
+        const sel = document.getElementById('monthly-selector'); sel.innerHTML = "";
+        if(monthArr.length === 0) { sel.innerHTML = "<option>データなし</option>"; document.getElementById('monthly-summary').innerHTML = ""; return; }
+        monthArr.forEach(m => { let opt = document.createElement('option'); opt.value = m; opt.innerText = m; sel.appendChild(opt); });
+        renderMonthlyData();
+      } catch (err) { document.getElementById('monthly-summary').innerHTML = '<div class="card" style="color:red; text-align:center;">通信エラーが発生しました。</div>'; }
+    }
+
+   function renderMonthlyData() {
+      const selMonth = document.getElementById('monthly-selector').value;
+      if(!selMonth || selMonth === "データなし") return;
+      
+      const isPurchase = (currentMonthlyTab === 'monthly-purchase');
+      const targetArr = isPurchase ? globalMonthlyData.purchase : globalMonthlyData.sales;
+      const monthData = targetArr.find(d => d.month === selMonth);
+      const sumDiv = document.getElementById('monthly-summary');
+      
+      if (!monthData) {
+        sumDiv.innerHTML = `<div class="card" style="text-align:center; color:#a0aec0; padding:20px;">${selMonth} のデータはありません。</div>`;
+        document.getElementById(isPurchase ? 'monthly-purchase-list' : 'monthly-sales-list').innerHTML = "";
+        document.getElementById('monthly-pagination').style.display = 'none'; return;
+      }
+      
+      let margin = monthData.sales > 0 ? Math.round((monthData.profit / monthData.sales) * 100) : 0;
+      
+      if (isPurchase) {
+        sumDiv.innerHTML = `
+        <div class="card" style="border-top:4px solid #3182ce;">
+           <div style="font-size:13px; font-weight:bold; color:#4a5568; margin-bottom:12px; display:flex; justify-content:space-between;">
+             <span><i class="fas fa-box-open" style="color:#2b6cb0;"></i> 仕入合計</span>
+             <span style="color:#718096;">${monthData.month}</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">総仕入額</span>
+             <span style="font-size:14px; font-weight:bold; color:#2d3748;">¥${Number(monthData.cost).toLocaleString()}</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">想定販売額</span>
+             <span style="font-size:14px; font-weight:bold; color:#2d3748;">¥${Number(monthData.sales).toLocaleString()}</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">仕入個数</span>
+             <span style="font-size:14px; font-weight:bold; color:#2d3748;">${monthData.count}個</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">仕入日数</span>
+             <span style="font-size:14px; font-weight:bold; color:#2d3748;">${monthData.daysCount}回</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">平均仕入額</span>
+             <span style="font-size:14px; font-weight:bold; color:#2d3748;">¥${monthData.count > 0 ? Number(Math.round(monthData.cost/monthData.count)).toLocaleString() : 0}</span>
+           </div>
+           <div style="background:${monthData.profit >= 0 ? '#f0fff4' : '#fff5f5'}; border:1px solid ${monthData.profit >= 0 ? '#c6f6d5' : '#fed7d7'}; padding:12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+             <span style="font-size:12px; font-weight:bold; color:#4a5568;">想定利益 (利益率)</span>
+             <span style="font-size:20px; font-weight:900; color:${monthData.profit >= 0 ? '#38a169' : '#e53e3e'};">¥${Number(monthData.profit).toLocaleString()} <span style="font-size:14px;">(${margin}%)</span></span>
+           </div>
+        </div>`;
+      } else {
+        const expense = monthData.expense || 0; 
+        const netProfit = monthData.profit - expense; 
+        const netMargin = monthData.sales > 0 ? Math.round((netProfit / monthData.sales) * 100) : 0;
+
+        // 💡 【ここを追加！】補填で黒字（マイナス経費）の時は緑色でプラス表示にする！
+        const expDisplay = expense < 0 
+          ? `<span style="font-size:14px; font-weight:bold; color:#07A27B;">+¥${Math.abs(expense).toLocaleString()} (補填等プラス)</span>`
+          : `<span style="font-size:14px; font-weight:bold; color:#e53e3e;">-¥${Number(expense).toLocaleString()}</span>`;
+
+        sumDiv.innerHTML = `
+        <div class="card" style="border-top:4px solid #e53e3e;">
+           <div style="font-size:13px; font-weight:bold; color:#4a5568; margin-bottom:12px; display:flex; justify-content:space-between;">
+             <span><i class="fas fa-hand-holding-usd" style="color:#d93025;"></i> 販売合計 (${monthData.count}件)</span>
+             <span style="color:#718096;">${monthData.month}</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">総販売額</span>
+             <span style="font-size:14px; font-weight:bold; color:#2d3748;">¥${Number(monthData.sales).toLocaleString()}</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">配送料合計</span>
+             <span style="font-size:14px; font-weight:bold; color:#2d3748;">¥${Number(monthData.shipping).toLocaleString()}</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">販売手数料等合計</span>
+             <span style="font-size:14px; font-weight:bold; color:#2d3748;">¥${Number(monthData.fee).toLocaleString()}</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:6px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">仕入原価合計</span>
+             <span style="font-size:14px; font-weight:bold; color:#2d3748;">¥${Number(monthData.cost).toLocaleString()}</span>
+           </div>
+           <div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px dashed #e2e8f0; padding-bottom:4px;">
+             <span style="font-size:11px; color:#4a5568;">諸経費合計</span>
+             ${expDisplay}  </div>
+           
+           <div style="background:${netProfit >= 0 ? '#f0fff4' : '#fff5f5'}; border:1px solid ${netProfit >= 0 ? '#c6f6d5' : '#fed7d7'}; padding:12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+             <span style="font-size:12px; font-weight:bold; color:#4a5568;">純利益 (利益率)</span>
+             <span style="font-size:20px; font-weight:900; color:${netProfit >= 0 ? '#38a169' : '#e53e3e'};">¥${Number(netProfit).toLocaleString()} <span style="font-size:14px;">(${netMargin}%)</span></span>
+           </div>
+        </div>`;
+      }
+      monthlyCurrentPage = 1; renderMonthlyList();
+    }
+
+    function renderMonthlyList() {
+      const selMonth = document.getElementById('monthly-selector').value;
+      const isPurchase = (currentMonthlyTab === 'monthly-purchase');
+      const targetArr = isPurchase ? globalMonthlyData.purchase : globalMonthlyData.sales;
+      const monthData = targetArr.find(d => d.month === selMonth);
+      const listDiv = document.getElementById(isPurchase ? 'monthly-purchase-list' : 'monthly-sales-list');
+      const pagiDiv = document.getElementById('monthly-pagination');
+      
+      if (!monthData || !monthData.items || monthData.items.length === 0) { listDiv.innerHTML = ""; pagiDiv.style.display = 'none'; return; }
+      
+      const kw = document.getElementById('monthly-search-kw').value.toLowerCase().trim();
+      let filtered = monthData.items;
+      if (kw) {
+         filtered = monthData.items.filter(item => (item.title && item.title.toLowerCase().includes(kw)) || (item.asin && item.asin.toLowerCase().includes(kw)) || (item.orderNum && item.orderNum.toLowerCase().includes(kw)));
+      }
+      
+      const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+      if (monthlyCurrentPage > totalPages) monthlyCurrentPage = totalPages; if (monthlyCurrentPage < 1) monthlyCurrentPage = 1;
+      const start = (monthlyCurrentPage - 1) * ITEMS_PER_PAGE; const pageItems = filtered.slice(start, start + ITEMS_PER_PAGE);
+      
+      if (pageItems.length === 0) { listDiv.innerHTML = '<div class="card" style="text-align:center; color:#a0aec0; padding:30px 10px;">見つかりませんでした。</div>'; pagiDiv.style.display = 'none'; return; }
+      
+      let html = "";
+      pageItems.forEach(item => {
+        let orderHtml = item.orderNum ? `<div style="font-size:10px; color:#a0aec0; margin-top:4px;">注文番号: ${item.orderNum}</div>` : "";
+        html += `
+        <div class="card" style="padding:12px; margin-bottom:10px; border-left:4px solid ${isPurchase ? '#3182ce' : '#e53e3e'};">
+           <div style="display:flex; justify-content:space-between; margin-bottom:6px; align-items:center;">
+              <span style="font-size:11px; font-weight:bold; color:#718096;"><i class="far fa-calendar-alt"></i> ${item.date}</span>
+              <span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">${item.asin}</span>
+           </div>
+           <div style="font-size:12px; font-weight:bold; color:#1a365d; margin-bottom:8px; line-height:1.4;">💎 ${escapeHtml(item.title)}</div>
+           ${orderHtml}
+           <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:8px; padding-top:8px; border-top:1px dashed #e2e8f0;">
+              <div style="font-size:11px; color:#718096; line-height:1.5;">仕入: <span style="color:#333; font-weight:bold;">¥${Number(item.cost).toLocaleString()}</span><br>販売: <span style="color:#333; font-weight:bold;">¥${Number(item.sales).toLocaleString()}</span></div>
+              <div style="text-align:right;"><div style="font-size:10px; color:#718096;">利益</div><div style="font-size:16px; font-weight:900; color:${item.profit >= 0 ? '#07A27B' : '#e53e3e'};">¥${Number(item.profit).toLocaleString()}</div></div>
+           </div>
+        </div>`;
+      });
+      listDiv.innerHTML = html;
+      
+      document.getElementById('monthly-page-info').innerText = `${monthlyCurrentPage} / ${totalPages} ページ`;
+      document.getElementById('monthly-btn-prev').disabled = (monthlyCurrentPage === 1);
+      document.getElementById('monthly-btn-next').disabled = (monthlyCurrentPage === totalPages);
+      pagiDiv.style.display = (totalPages > 1) ? 'flex' : 'none';
+      document.getElementById('monthly-search-kw').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ==========================================
+    // 🚀 Researcher精査 機能のJSコード
+    // ==========================================
+    let globalResearcherData = [];
+    let asinCopyIndex = 0; // コピーした件数を記憶
+
+    // 1️⃣ GASから未精査データを取得
+    async function loadResearcherData() {
+      const resDiv = document.getElementById('researcherResult');
+      resDiv.innerHTML = '<div class="loading-spinner">⌛ リサーチsheetから候補を取得中...</div>';
+      document.getElementById('resCount').innerText = "同期中...";
+      
+      const researcherUrl = AppStorage.get("sh_researcher_url", "");
+      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+      
+      if (!researcherUrl || !targetGasUrl) { 
+        resDiv.innerHTML = '<div class="card" style="text-align:center; color:#e53e3e; font-weight:bold;">⚙️設定からResearcherのURLを登録してな！</div>'; 
+        return; 
+      }
+
+      try {
+        // 💡 iOSのSafari通信弾き対策で headers を追加！
+        const res = await fetch(targetGasUrl, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ command: 'getResearcherData', ssUrl: researcherUrl }) 
+        });
+        
+        // 💡 GASがエラー画面（HTML）を返してないかチェック！
+        const text = await res.text();
+        let json;
+        try {
+          json = JSON.parse(text);
+        } catch(e) {
+          throw new Error("GASエラー発生中: " + text.substring(0, 40) + "...");
+        }
+
+        if (json.success) {
+          globalResearcherData = json.data;
+          asinCopyIndex = 0;
+          renderResearcherList();
+        } else {
+          resDiv.innerHTML = '<div class="card" style="color:#e53e3e; text-align:center;">❌ 取得失敗: ' + json.message + '</div>';
+        }
+      } catch(err) {
+        // 💡 エラーの「本当の理由」を画面に晒し上げる！！
+        resDiv.innerHTML = `<div class="card" style="text-align:center;">
+          <div style="color:#e53e3e; font-weight:bold; margin-bottom:8px;">❌ 通信エラーの正体</div>
+          <div style="font-size:11px; color:#4a5568; background:#f8fafc; padding:8px; border-radius:6px; word-break:break-all;">${err.message}</div>
+        </div>`;
+      }
+    }
+
+  // 2️⃣ 画面にリストを描画（🌟IMAGE関数完全対応版🌟）
+    function renderResearcherList() {
+      const resDiv = document.getElementById('researcherResult');
+      document.getElementById('resCount').innerText = `残候補: ${globalResearcherData.length}件`;
+      
+      if (globalResearcherData.length === 0) {
+        resDiv.innerHTML = '<div class="card" style="text-align:center; padding:30px 10px; color:#a0aec0; font-size:13px;">現在、未精査の候補はありません。</div>';
+        return;
+      }
+
+      let html = "";
+      globalResearcherData.forEach((item, index) => {
+        // 🌟 1. 画像処理（GASから届いた綺麗なURLをそのまま使う！）
+        let imgUrl = item.img ? item.img.toString().trim() : '';
+
+        // 万が一の保険（ASINから画像を取得する裏URL）
+        const fallbackAsinImg = `https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=${item.asin}&Format=_SL250_&ID=AsinImage&MarketPlace=JP&ServiceVersion=20070822&WS=1`;
+        
+        if (!imgUrl || imgUrl === 'No Img' || imgUrl === '-' || imgUrl.includes('[object')) {
+          imgUrl = fallbackAsinImg;
+        }
+
+        let imgHtml = `<div style="width:60px; height:60px; background:#fff; border:1px solid #eee; border-radius:6px; padding:2px; flex-shrink:0;">
+          <img src="${imgUrl}" style="width:100%; height:100%; object-fit:contain;" onerror="this.onerror=null;this.src='${fallbackAsinImg}';">
+        </div>`;
+
+        // 🌟 4. ランク色分け
+        let rankColor = '#000000'; // その他は黒
+        let rankText = item.rank ? item.rank.toString().toUpperCase() : '';
+        if (rankText === 'SR') rankColor = '#a855f7'; // 紫
+        else if (rankText === 'S') rankColor = '#e53e3e';  // 赤
+        else if (rankText === 'A') rankColor = '#f7941d'; // オレンジ
+        else if (rankText === 'B') rankColor = '#3182ce'; // 青
+        else if (rankText === 'C') rankColor = '#07A27B'; // 緑
+
+        // 🌟 2. サイズ区分
+        let sizeTier = item.size ? item.size.toString() : '標準';
+        let sizeColor = sizeTier.includes('大型') ? '#e53e3e' : '#07A27B';
+
+        html += `
+        <div class="card" id="resCard_${index}" style="display:flex; align-items:flex-start; gap:12px; padding:12px; margin-bottom:10px; border-left:5px solid ${rankColor};">
+          <input type="checkbox" id="check_${index}" style="width:28px; height:28px; margin-top:15px;">
+          
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:11px; font-weight:bold; background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px;">${item.asin}</span>
+              <span style="font-size:11px; font-weight:bold; color:${rankColor}; border:1px solid ${rankColor}; padding:1px 6px; border-radius:4px;">${item.rank}ランク</span>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-bottom:8px;">
+              ${imgHtml}
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:12px; font-weight:bold; color:#1a365d; line-height:1.4; margin-bottom:4px; word-break:break-all;">${escapeHtml(item.title)}</div>
+                <span class="badge" style="background:${sizeColor}; color:white; padding:3px 8px; font-size:9px;">${escapeHtml(sizeTier)}</span>
+              </div>
+            </div>
+            
+            <div style="font-size:10px; font-weight:bold; color:#718096; margin-bottom:2px;">検索キーワード (手動調整OK)</div>
+            <input type="text" id="keyword_${index}" value="${escapeHtml(item.model)}" style="width:100%; padding:8px; border:1px solid #cbd5e0; border-radius:4px; font-size:13px; font-weight:bold; background:#fff; outline:none; margin-bottom:8px; box-sizing:border-box;">
+            
+            <div style="background:#f8fafc; padding:8px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:8px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:11px; font-weight:bold; color:#4a5568; border-bottom:1px dashed #cbd5e0; padding-bottom:4px;">
+                <span>予定売価: ¥${Number(item.sellPrice).toLocaleString()}</span>
+                <span style="color:#07A27B;">仕入値: ¥${Number(item.buyPrice).toLocaleString()}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#4a5568;">
+                <span>最安売価: ¥${Number(item.minUsed).toLocaleString()}</span>
+                <span style="color:#07A27B;">最安仕入: ¥${Number(item.minBuyPrice).toLocaleString()}</span>
+              </div>
+            </div>
+            
+            <div style="text-align:right;">
+              <a href="https://keepa.com/#!product/5-${item.asin}" target="_blank" style="background:#55a676; color:white; text-decoration:none; padding:6px 12px; border-radius:6px; font-size:11px; font-weight:bold;"><i class="fas fa-chart-line"></i> Keepa</a>
+            </div>
+          </div>
+        </div>`;
+      });
+      resDiv.innerHTML = html;
+    }
+
+    // 3️⃣ チェックしたやつ（いらんやつ）をリストから消去！
+    async function removeCheckedItems() {
+      const asinsToDelete = [];
+      
+      globalResearcherData.forEach((item, index) => {
+        const checkbox = document.getElementById(`check_${index}`);
+        if (checkbox && checkbox.checked) {
+          asinsToDelete.push(item.asin); // 💡 行番号ではなく「ASIN」を収集！
+        }
+      });
+      
+      if(asinsToDelete.length === 0) return alert("削除する項目にチェックを入れてな！");
+
+      const btn = document.querySelector('button[onclick="removeCheckedItems()"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = "⌛ 削除中...";
+      btn.disabled = true;
+
+      const researcherUrl = AppStorage.get("sh_researcher_url", "");
+      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+      
+      if (researcherUrl) {
+        try {
+          await fetch(targetGasUrl, { 
+            method: 'POST', 
+            // 💡 子機GASの都合上、変数の名前は remainingItems のままやけど、中身は「消すASINのリスト」を送る！
+            body: JSON.stringify({ command: 'updateResearcherSheet', ssUrl: researcherUrl, remainingItems: asinsToDelete }) 
+          });
+          // 削除完了後、GASから最新のリストを再取得
+          await loadResearcherData();
+        } catch (e) {
+          alert("通信エラー");
+        }
+      }
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+
+// 4️⃣ ASINを20件ずつコピーして「別アプリで確認」に変更！
+    function copyAsins20() {
+      if(globalResearcherData.length === 0) return;
+      
+      // まだコピーしてない次の20件を取得
+      const targetItems = globalResearcherData.slice(asinCopyIndex, asinCopyIndex + 20);
+      if(targetItems.length === 0) {
+        alert("すべてのASINをコピー済みです！\n最初からコピーし直す場合は一度他の画面へ移動してください。");
+        return;
+      }
+      
+      // カンマ区切りでASINを結合
+      const asinString = targetItems.map(i => i.asin).join(',');
+      
+      navigator.clipboard.writeText(asinString).then(() => {
+        alert(`上から ${asinCopyIndex + 1}件目 ～ ${asinCopyIndex + targetItems.length}件目 のASINをコピーしたで！\n別アプリで確認してな！`);
+        asinCopyIndex += 20; // 次のスタート位置を更新
+        
+        // 🌟 自動でセラセンを開く処理を削除したで！
+      });
+    }
+
+    // 5️⃣ 最後に残ったエリートたちをGASに送信！！
+    async function sendEliteItems(btn) {
+      if(globalResearcherData.length === 0) return alert("登録する商品がありません！");
+      
+      globalResearcherData.forEach((item, index) => {
+        const kwInput = document.getElementById(`keyword_${index}`);
+        if(kwInput) item.model = kwInput.value.trim();
+      });
+
+      const originalText = btn.innerText;
+      btn.innerText = "⌛ 移動＆シート整理中...";
+      btn.disabled = true;
+
+      const researcherUrl = AppStorage.get("sh_researcher_url", "");
+      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+
+      try {
+        const res = await fetch(targetGasUrl, { 
+          method: 'POST', 
+          body: JSON.stringify({ command: 'registerEliteItems', ssUrl: researcherUrl, items: globalResearcherData }) 
+        });
+        const json = await res.json();
+        
+        if (json.success) {
+          alert("✅ 仕入れsheetへの移動が完了しました！\n（リサーチsheetからも削除されました）");
+          // 💡 登録完了後、GASから最新のリストを再取得して画面を更新する！（行ズレ完全防止！）
+          await loadResearcherData();
+        } else {
+          alert("❌ 登録失敗: " + json.message);
+        }
+      } catch(err) {
+        alert("通信エラーが発生しました");
+      }
+      btn.innerText = originalText;
+      btn.disabled = false;
+    }
+
+    // 🚀 ステップ②: 下に引っ張って更新 (Pull to Refresh) の処理
+    let ptrStartY = 0; let ptrCurrentY = 0; let ptrIsPulling = false;
+    document.addEventListener('touchstart', e => {
+      if (window.scrollY <= 0) { ptrStartY = e.touches[0].clientY; ptrIsPulling = true; }
+    }, {passive: true});
+    document.addEventListener('touchmove', e => {
+      if (!ptrIsPulling) return;
+      ptrCurrentY = e.touches[0].clientY;
+      let diff = ptrCurrentY - ptrStartY;
+      if (diff > 0 && window.scrollY <= 0) {
+        const ptrEl = document.getElementById('ptr-indicator');
+        if (diff > 80) diff = 80; 
+        ptrEl.style.top = (diff - 40) + 'px';
+        if (diff > 60) ptrEl.innerText = "🔄 離して更新";
+        else ptrEl.innerText = "⬇️ 引っ張って更新...";
+      }
+    }, {passive: true});
+    document.addEventListener('touchend', e => {
+      if (!ptrIsPulling) return;
+      ptrIsPulling = false;
+      let diff = ptrCurrentY - ptrStartY;
+      const ptrEl = document.getElementById('ptr-indicator');
+      if (diff > 60 && window.scrollY <= 0) {
+        ptrEl.style.top = '60px'; 
+        ptrEl.innerText = "⌛ 更新中...";
+        syncPatrolData(); 
+        fetchDashboardData();
+        setTimeout(() => { ptrEl.style.top = '-50px'; }, 2000); 
+      } else {
+        ptrEl.style.top = '-50px'; 
+      }
+    }, {passive: true});
+  
+  async function updateKeepaInventory() {
+      const btn = document.getElementById('keepaBtn');
+      if(btn) { btn.disabled = true; btn.innerText = "更新中..."; }
+
+      const ssUrl = AppStorage.get("sh_ssurl", "");
+      const keepaKey = AppStorage.get("sh_keepa", ""); 
+      const sellerId = AppStorage.get("sh_seller_id", "");
+      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+
+      if (!ssUrl || !targetGasUrl || !keepaKey || !sellerId) {
+        alert("⚙️設定画面からURL、Keepaキー、セラーIDを登録してな！");
+        if(btn) { btn.disabled = false; btn.innerText = "在庫更新 (Keepa)"; }
+        return;
+      }
+
+      try {
+        const res = await fetch(targetGasUrl, {
+          method: 'POST',
+          body: JSON.stringify({ command: 'startKeepaDirect', ssUrl: ssUrl, keepaKey: keepaKey, sellerId: sellerId })
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          // 🎯 成功したらボタンの文字を変えて、即座に画面の再読み込みを自動発動させる！
+          if(btn) { btn.innerText = "✅完了! 再読込中..."; }
+          await loadInventoryPrice(); 
+        } else {
+          alert("❌ エラー: " + json.message);
+        }
+      } catch(err) {
+        alert("❌ 通信エラーが発生しました");
+      } finally {
+        if(btn) { btn.disabled = false; btn.innerText = "在庫更新 (Keepa)"; }
+      }
+    }
+   
+   // 💸 経費入力窓を開く
+    function openExpenseModal() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = ("0" + (today.getMonth() + 1)).slice(-2);
+      const dd = ("0" + today.getDate()).slice(-2);
+      
+      // 開いた瞬間に、今の月と日を自動で入れてあげる
+      document.getElementById('expMonth').value = `${yyyy}/${mm}`;
+      document.getElementById('expDate').value = `${yyyy}/${mm}/${dd}`;
+      document.getElementById('expAmount').value = "";
+      document.getElementById('expMemo').value = "";
+      
+      document.getElementById('expTypeSelect').value = "梱包資材";
+      toggleExpTypeInput(); // 表示リセット
+      
+      document.getElementById('expenseModal').style.display = "flex";
+    }
+
+    // 💸 窓を閉じる
+    function closeExpenseModal() {
+      document.getElementById('expenseModal').style.display = "none";
+    }
+
+    // 💸 「その他」を選んだら入力枠をスッと出すギミック
+    function toggleExpTypeInput() {
+      const select = document.getElementById('expTypeSelect');
+      const customInput = document.getElementById('expTypeCustom');
+      if (select.value === "その他") {
+        customInput.style.display = "block";
+        customInput.focus();
+      } else {
+        customInput.style.display = "none";
+        customInput.value = "";
+      }
+    }
+
+    // 💸 登録ボタンを押した時の送信処理
+    async function submitExpense() {
+      const month = document.getElementById('expMonth').value.trim();
+      const amount = document.getElementById('expAmount').value.trim();
+      if (!month || !amount) return alert("発生月と金額は絶対入れてな！");
+
+      const selectVal = document.getElementById('expTypeSelect').value;
+      let type = selectVal;
+      if (selectVal === "その他") {
+        type = document.getElementById('expTypeCustom').value.trim();
+        if (!type) return alert("経費の種類を入力してな！");
+      }
+
+      const date = document.getElementById('expDate').value.trim();
+      const memo = document.getElementById('expMemo').value.trim();
+
+      const btn = document.getElementById('expSubmitBtn');
+      btn.innerText = "⌛ 登録中...";
+      btn.disabled = true;
+
+      const ssUrl = AppStorage.get("sh_ssurl", "");
+      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+
+      try {
+        const res = await fetch(targetGasUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            command: 'registerExpense',
+            ssUrl: ssUrl,
+            data: { month: month, date: date, type: type, amount: amount, memo: memo }
+          })
+        });
+        const json = await res.json();
+        
+        if (json.success) {
+          btn.style.background = "#38a169";
+          btn.innerText = "✅ 登録完了！";
+          setTimeout(() => {
+            closeExpenseModal();
+            btn.style.background = "#e53e3e";
+            btn.innerText = "🚀 経費を登録";
+            btn.disabled = false;
+            // もし月別データ画面を開いてたら自動で再読込する
+            if (currentActiveView === 'view-monthly') loadMonthlyData();
+          }, 1500);
+        } else {
+          alert("エラー: " + json.message);
+          btn.innerText = "🚀 経費を登録";
+          btn.disabled = false;
+        }
+      } catch(e) {
+        alert("通信エラーが発生しました");
+        btn.innerText = "🚀 経費を登録";
+        btn.disabled = false;
+      }
+    }
+
+    // 🚀 JANコード専用・スキャン実読取りロジック（Quaggaエンジン版）
+    function startBarcodeScanTest() {
+      const area = document.getElementById('barcodeTestScannerArea');
+      const status = document.getElementById('barcodeTestStatus');
+      
+      area.style.display = 'block';
+      status.innerText = "カメラ初期化中...";
+
+      // 解像度とスキャンエリアを最適化して初期化
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.getElementById('barcodeTestVideo'), 
+          constraints: {
+            width: { ideal: 1280 }, // 🎯 解像度を上げて線情報を細かく捉える
+            height: { ideal: 720 },
+            facingMode: "environment" 
+          },
+          area: { top: "0%", right: "0%", left: "0%", bottom: "0%" } // 🎯 上半分バグを解消するため全体をスキャン
+        },
+        decoder: {
+          readers: ["ean_reader", "ean_8_reader"] // 🎯 短い8桁のJANコードにも対応
+        },
+        locate: true 
+      }, function(err) {
+        if (err) {
+          console.error(err);
+          fallbackGenericCamera();
+          return;
+        }
+        Quagga.start();
+        status.innerText = "バーコード（JANコード）読み取り中...";
+        
+        // 🎯 自動生成された内部のvideo要素にスタイルを強制適用して表示崩れを防ぐ
+        setTimeout(() => {
+          const internalVideo = document.querySelector('#barcodeTestVideo video');
+          if (internalVideo) {
+            internalVideo.style.width = "100%";
+            internalVideo.style.height = "auto";
+            internalVideo.style.display = "block";
+          }
+        }, 300);
+      });
+
+      // 読取り成功時の即時発火イベントをフック
+
+      // 読取り成功時の即時発火イベントをフック
+      Quagga.onDetected(function(result) {
+        if (result && result.codeResult && result.codeResult.code) {
+          const code = result.codeResult.code;
+          
+          // 日本のJANコードの特性（49または45から始まる13桁の数字）を正規表現で厳格にバリデーション
+          const matched = code.match(/^(49\d{11}|45\d{11})$/);
+          if (matched) {
+            status.innerText = "🎯 読み取り成功！";
+            document.getElementById('amazonKw').value = matched[1]; // 13桁のJANコードを検索窓に即時代入
+            
+            if (navigator.vibrate) navigator.vibrate(200); // 読取り成功をバイブで通知（スマホ用）
+            
+            Quagga.offDetected();
+            setTimeout(() => {
+              stopBarcodeScanTest();
+              runAmazonResearch(); // 即座にKeepa解析ロジックへバトンタッチ
+            }, 500);
+          }
+        }
+      });
+    }
+
+    // カメラの安全停止とお片付け
+    function stopBarcodeScanTest() {
+      try {
+        Quagga.stop();
+        Quagga.offDetected();
+      } catch(e) {}
+      document.getElementById('barcodeTestScannerArea').style.display = 'none';
+    }
+
+    async function fallbackGenericCamera() {
+      const status = document.getElementById('barcodeTestStatus');
+      const area = document.getElementById('barcodeTestScannerArea');
+      try {
+        Quagga.init({
+          inputStream: { name: "Live", type: "LiveStream", target: document.getElementById('barcodeTestVideo'), constraints: { facingMode: "user" } },
+          decoder: { readers: ["ean_reader"] }
+        }, function(err) {
+          if(err) { alert("カメラの起動に失敗しました。設定を確認してな。"); area.style.display = 'none'; return; }
+          Quagga.start();
+          status.innerText = "バーコード（JANコード）読み取り中...";
+        });
+      } catch(e) {
+        area.style.display = 'none';
+      }
+    }
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+    const firebaseConfig = { apiKey: "AIzaSyApLErkBMaLTKLAVDeA_-aZYMnPilaDGU8", authDomain: "searchhub-mobile.firebaseapp.com", projectId: "searchhub-mobile", storageBucket: "searchhub-mobile.firebasestorage.app", messagingSenderId: "18757861506", appId: "1:18757861506:web:4826ba1337e48431f0f49b" };
+    const app = initializeApp(firebaseConfig); const messaging = getMessaging(app);
+
+    window.enablePushNotifications = async function(btn) {
+      try {
+        btn.innerText = "⌛ 通知設定を生成中や…"; btn.disabled = true;
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js'); await navigator.serviceWorker.ready;
+          const currentToken = await getToken(messaging, { vapidKey: "BJMWJMJx2CGiDNuLq7xixOKeBlN8Hd3vNvbx4QmK7mf1R3ccUCXuP0o-ZlsRurw7MhpiwWLZuvu57twS5jypqlU", serviceWorkerRegistration: registration });
+          if (currentToken) {
+            AppStorage.set("sh_fcm_token", currentToken); const sniperUrl = AppStorage.get("sh_sniper_url", "");
+            if (sniperUrl) { fetch(sniperUrl, { method: 'POST', body: JSON.stringify({ command: 'saveToken', token: currentToken }) }); alert("✅ 通知設定完了！"); btn.innerText = "✅ 通知設定完了"; } 
+            else { alert("⚠️ S側 GAS URL を設定してな！"); btn.innerText = "🔔 通知許可する"; btn.disabled = false; }
+          } else { alert("❌ トークン取得失敗"); btn.innerText = "🔔 通知許可する"; btn.disabled = false; }
+        } else { alert("通知ブロック中。"); btn.innerText = "🔔 通知許可する"; btn.disabled = false; }
+      } catch (err) { alert("エラー\n" + err.message); btn.innerText = "🔔 通知許可する"; btn.disabled = false; }
+    }
+  </script>
+</body>
+</html>
