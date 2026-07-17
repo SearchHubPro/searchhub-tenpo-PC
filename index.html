@@ -156,11 +156,17 @@
     /* 🚀 ステップ②: 引っ張って更新の見た目追加 */
     #ptr-indicator { position: fixed; top: -50px; left: 0; width: 100%; text-align: center; z-index: 1000; transition: top 0.3s; font-weight: bold; color: #008296; font-size: 13px; background: rgba(255,255,255,0.95); padding: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 0 0 12px 12px; pointer-events: none;}
 
-    /* 🎯 🚀 Quaggaの映像巨大化・黒画面残りを強制的に黙らせる最強CSS */
+    /* 🎯 小さい横長のスタイリッシュなスキャン画面にするための強制CSS */
+    #barcodeTestVideo {
+      width: 100% !important;
+      height: 200px !important; /* 🚀 高さを200pxの横長に完全固定 */
+      overflow: hidden;         /* 🚀 縦に伸びる余計な黒画面をすべて強制カット */
+      position: relative;
+    }
     #barcodeTestVideo video {
       width: 100% !important;
-      height: auto !important;
-      object-fit: contain;
+      height: 100% !important;
+      object-fit: cover;        /* 🚀 カメラ映像を横長の枠内に隙間なくフィットさせる */
     }
   </style>
 </head>
@@ -227,8 +233,8 @@
       <!-- 🎯 長い黒画面を解消する洗練されたスキャナーデザイン -->
       <div id="barcodeTestScannerArea" style="display:none; width:100%; max-width:450px; margin: 12px auto; border: 1px solid #cbd5e0; border-radius: 12px; overflow: hidden; position: relative; background:#111; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         
-        <!-- カメラ映像がハメ込まれるエリア（Quaggaの出力に合わせて高さは自動フィット） -->
-        <div id="barcodeTestVideo" style="width:100%; height:auto; display:block; line-height:0;"></div>
+        <!-- カメラ映像がハメ込まれるエリア（CSSで横長200pxに固定化） -->
+        <div id="barcodeTestVideo" style="display:block; line-height:0;"></div>
         <canvas id="barcodeTestCanvas" style="display:none;"></canvas>
         
         <!-- 右上の閉じるボタン（デザインをブラッシュアップ） -->
