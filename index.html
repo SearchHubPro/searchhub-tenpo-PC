@@ -42,10 +42,7 @@
     .view.active { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     
-    .graph-card { background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 16px; border: 1px solid #d5d9d9; min-height: 240px; }
-    .home-top-tabs { display: flex; justify-content: flex-start; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #d5d9d9; }
-    .home-tab-btn { padding: 8px 12px; border: none; font-size: 13px; font-weight: bold; background: transparent; color: #565959; cursor: pointer; border-bottom: 3px solid transparent; flex: 1; text-align: center; }
-    .home-tab-btn.active { color: #008296; border-bottom: 3px solid #008296; }
+    .graph-card { background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 16px; border: 1px solid #d5d9d9; min-height: 180px; }
     
     .turnover-container { display: block; padding-bottom: 16px; }
     .turnover-row-1 { display: flex; flex-direction: column; gap: 16px; width: 100%; align-items: center; }
@@ -91,14 +88,6 @@
     .splash-img { width: 100%; height: 100%; object-fit: cover; }
     .splash-text { position: absolute; bottom: 60px; color: white; font-size: 14px; font-weight: bold; letter-spacing: 2px; animation: pulse 1.5s infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-    .modal-content { background: white; padding: 20px; border-radius: 12px; width: 85%; max-width: 340px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
-    .modal-content h3 { margin-top: 0; font-size: 15px; color: #1a365d; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
-    .modal-content label { display: block; font-size: 11px; font-weight: bold; margin-top: 12px; color: #4a5568; }
-    .modal-content input { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
-    .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
-    .modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
     @media (min-width: 768px) {
       body { max-width: 100%; margin: 0; background-color: #f2f4f8; }
@@ -317,8 +306,28 @@
   </div>
 
   <script>
-    let viewHistoryStack = ['view-home'];
+    // 💡 画面をフタしている黒い画面（ローディング）を消し去る超重要関数
+    function hideLoader() {
+      const loader = document.getElementById("loader");
+      if (loader && loader.style.display !== "none") {
+        loader.style.opacity = "0";
+        setTimeout(() => { loader.style.display = "none"; }, 400);
+      }
+    }
+
+    const AppStorage = {
+      get: function(key, def) { try { return localStorage.getItem(key) || def; } catch(e) { return def; } },
+      set: function(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+    };
+
+    let globalInventoryData = [];
+    let globalLedgerData = [];
     let pendingRegData = {};
+
+    // アプリが立ち上がった瞬間に一番最初に走る自動処理
+    document.addEventListener("DOMContentLoaded", function() {
+      fetchDashboardData(); // Supabaseから数値を拾い出して集計
+    });
 
     function openConfig() {
       document.getElementById("cfgKeepa").value = AppStorage.get("sh_keepa", "");
@@ -344,6 +353,9 @@
       } catch(e) { if(valEl) valEl.innerText = "エラー"; }
     };
 
+    // =========================================================================
+    // 📊 1. ダッシュボード情報のリアルタイム集計（Supabase直結）
+    // =========================================================================
     async function fetchDashboardData() {
       try {
         const { data: invData, error } = await supabase.from('inventories').select('*');
@@ -352,13 +364,15 @@
         let totalInvCount = 0, totalInvValue = 0, todayBuyAmount = 0, todayEstProfit = 0, todayCount = 0;
         const todayStr = new Date().toISOString().split('T')[0];
 
-        invData.forEach(item => {
-          if (item.status === '出品中') { totalInvCount++; totalInvValue += (item.buy_price || 0); }
-          if (item.purchase_date === todayStr) {
-            todayCount++; todayBuyAmount += (item.buy_price || 0);
-            todayEstProfit += ((item.sell_price || 0) - (item.buy_price || 0) - (item.shipping_cost || 0) - (item.referral_fee + item.fba_fee));
-          }
-        });
+        if (invData) {
+          invData.forEach(item => {
+            if (item.status === '出品中') { totalInvCount++; totalInvValue += (item.buy_price || 0); }
+            if (item.purchase_date === todayStr) {
+              todayCount++; todayBuyAmount += (item.buy_price || 0);
+              todayEstProfit += ((item.sell_price || 0) - (item.buy_price || 0) - (item.shipping_cost || 0) - ((item.referral_fee || 0) + (item.fba_fee || 0)));
+            }
+          });
+        }
 
         const countEl = document.getElementById('realtime-inv-count');
         const valEl = document.getElementById('realtime-inv-value');
@@ -385,9 +399,16 @@
           `;
         }
         checkKeepaToken();
-      } catch(e) { console.error(e); }
+      } catch(e) { 
+        console.error(e); 
+      } finally {
+        hideLoader(); // 何が起きても必ずローディング画面のフタを外す
+      }
     }
 
+    // =========================================================================
+    // 📥 2. 解析・計算・仕入れ登録
+    // =========================================================================
     async function runAmazonResearch(fallbackTitle) {
       const kw = document.getElementById("amazonKw").value.trim(); 
       const resView = document.getElementById("amazonResult"); 
@@ -482,20 +503,21 @@
 
     async function fetchSupplierList() {
       const select = document.getElementById("supplierSelect");
-      try {
-        const defaultSuppliers = ["メルカリ", "ヤフオク", "ヤフフリ", "店舗", "セカスト"];
-        select.innerHTML = '<option value="">選択してください</option>';
-        defaultSuppliers.forEach(sup => { select.innerHTML += `<option value="${sup}">${sup}</option>`; });
-      } catch(e) {}
+      const defaultSuppliers = ["メルカリ", "ヤフオク", "ヤフフリ", "店舗", "セカスト"];
+      select.innerHTML = '<option value="">選択してください</option>';
+      defaultSuppliers.forEach(sup => { select.innerHTML += `<option value="${sup}">${sup}</option>`; });
     }
 
+    // =========================================================================
+    // ⚙️ 3. 価格改定ロジック（Supabase）
+    // =========================================================================
     async function loadInventoryPrice() {
       const tbody = document.getElementById('priceResult');
       tbody.innerHTML = '<tr><td colspan="6" class="loading-spinner">⌛ 在庫抽出中...</td></tr>';
       try {
         const { data, error } = await supabase.from('inventories').select('*').eq('status', '出品中');
         if (error) throw error;
-        globalInventoryData = data;
+        globalInventoryData = data || [];
         renderInventoryList();
       } catch(e) { tbody.innerHTML = '<tr><td colspan="6">取得エラー</td></tr>'; }
     }
@@ -505,7 +527,6 @@
       const kw = document.getElementById('price-search-kw').value.toLowerCase().trim();
       let filtered = globalInventoryData;
       if (kw) filtered = globalInventoryData.filter(i => (i.title && i.title.toLowerCase().includes(kw)) || (i.asin && i.asin.toLowerCase().includes(kw)));
-      document.getElementById('inventoryCount').innerText = `出品中在庫: ${filtered.length}件`;
       
       let html = '';
       filtered.forEach((item, index) => {
@@ -523,6 +544,18 @@
       filtered.forEach((item, index) => calcSimProfit(`inv_${index}`, item.buy_price, item.fba_fee, 10));
     }
 
+    window.calcSimProfit = function(id, cost, fbaFee, feePercent) {
+      const priceInput = document.getElementById('sim_price_' + id);
+      const profitSpan = document.getElementById('sim_profit_' + id);
+      if(!priceInput || !profitSpan) return;
+
+      const price = Number(priceInput.value) || 0;
+      const comm = Math.floor(price * (feePercent / 100));
+      const profit = price - comm - fbaFee - cost;
+      profitSpan.innerText = '¥' + profit.toLocaleString();
+      profitSpan.style.color = profit >= 0 ? '#07A27B' : '#e53e3e';
+    };
+
     window.updateSupabasePrice = async function(dbId, uniqueId) {
       const newPrice = parseInt(document.getElementById('sim_price_' + uniqueId).value) || 0;
       try {
@@ -531,13 +564,16 @@
       } catch(e) { alert(e.message); }
     };
 
+    // =========================================================================
+    // 📖 4. 帳簿管理・経費管理ロジック（Supabase）
+    // =========================================================================
     async function loadLedgerData() {
       const tbody = document.getElementById('ledgerResult');
       tbody.innerHTML = '<tr><td colspan="7" class="loading-spinner">⌛ 帳簿抽出中...</td></tr>';
       try {
         const { data, error } = await supabase.from('inventories').select('*');
         if (error) throw error;
-        globalLedgerData = data;
+        globalLedgerData = data || [];
         renderLedgerList();
       } catch(e) { tbody.innerHTML = '<tr><td colspan="7">エラー</td></tr>'; }
     }
@@ -547,7 +583,6 @@
       const kw = document.getElementById('ledger-search-kw').value.toLowerCase().trim();
       let filtered = globalLedgerData;
       if (kw) filtered = globalLedgerData.filter(i => (i.title && i.title.toLowerCase().includes(kw)) || (i.asin && i.asin.toLowerCase().includes(kw)));
-      document.getElementById('ledgerCount').innerText = `表示中: ${filtered.length}件`;
 
       let html = '';
       filtered.forEach(item => {
@@ -557,7 +592,7 @@
           <td>${item.purchase_date || '-'}</td>
           <td style="white-space:normal;"><div style="font-weight:bold;color:#1a365d;">${escapeHtml(item.title)}</div><div style="font-size:10px;color:#999;">ASIN: ${item.asin}</div></td>
           <td style="text-align:right;">原価: ¥${item.buy_price.toLocaleString()}<br>売価: ¥${item.sell_price.toLocaleString()}</td>
-          <td style="text-align:right; font-weight:bold; color:#07A27B;">¥${(item.sell_price - item.buy_price - item.fba_fee - item.referral_fee - item.shipping_cost).toLocaleString()}</td>
+          <td style="text-align:right; font-weight:bold; color:#07A27B;">¥${(item.sell_price - item.buy_price - (item.fba_fee || 0) - (item.referral_fee || 0) - (item.shipping_cost || 0)).toLocaleString()}</td>
           <td style="text-align:center;"><button onclick="deleteLedgerItem('${item.id}')" style="background:#e53e3e; color:white; border:none; padding:6px; border-radius:4px;"><i class="fas fa-trash-alt"></i></button></td>
         </tr>`;
       });
@@ -605,6 +640,7 @@
       try { await supabase.from('expenses').delete().eq('id', id); loadExpenseListData(); } catch(e) { alert(e.message); }
     };
 
+    // 画面遷移コントロール
     function openView(viewId, isBack = false) {
       if (!isBack && currentActiveView !== viewId) viewHistoryStack.push(currentActiveView);
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
