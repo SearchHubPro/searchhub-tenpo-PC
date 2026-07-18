@@ -1034,6 +1034,7 @@ const supabase = window.supabase.createClient(
 
     const monthlyOrder = ['monthly-purchase', 'monthly-sales']; 
     const homeOrder = ['turnover', 'purchase', 'sales']; 
+    let currentHomeMode = 'turnover'; // 🔧 未定義のまま参照されフリーズの原因になっていたため初期化
 
     // 🚀 Keepaトークン確認ロジックから、消去済みのボタン(btn)の操作を完全に削除
     window.checkKeepaToken = async function() {
@@ -1687,33 +1688,44 @@ const supabase = window.supabase.createClient(
       }
     }
 
-    async function loadInventoryPrice() {
-      const tbody = document.getElementById('priceResult');
-      const countEl = document.getElementById('inventoryCount');
-      if(tbody) tbody.innerHTML = '<tr><td colspan="7" class="loading-spinner">⌛ 在庫抽出中...</td></tr>';
-      try {
-        const { data, error } = await supabase.from('inventories').select('*').in('status', ['出品中', '納品待ち']);
-        if (error) throw error;
-        
-        globalInventoryData = (data || []).map(item => ({
-          id: item.id,
-          title: item.title || '',
-          asin: item.asin || '',
-          sku: item.sku || '',
-          condition: item.condition || '',
-          price: Number(item.sell_price || 0),
-          cost: Number(item.buy_price || 0),
-          fbaFee: Number(item.fba_fee || 0),
-          feePercent: 10
-        }));
-        invCurrentPage = 1; renderInventoryList();
-      } catch(e) { 
-        console.error(e);
-        if(tbody) tbody.innerHTML = '<tr><td colspan="7" style="color:red; text-align:center;">取得エラー</td></tr>'; 
-      }
+   async function loadInventoryPrice() {
+  const tbody = document.getElementById('priceResult');
+  const countEl = document.getElementById('inventoryCount');
+
+  if (tbody) tbody.innerHTML =
+    '<tr><td colspan="7" class="loading-spinner">⌛ 在庫抽出中...</td></tr>';
+
+  try {
+    const { data, error } = await supabase
+      .from('inventories')
+      .select('*')
+      .in('status', ['出品中', '納品待ち']);
+
+    if (error) throw error;
+
+    globalInventoryData = (data || []).map(item => ({
+      id: item.id,
+      title: item.title || '',
+      asin: item.asin || '',
+      sku: item.sku || '',
+      condition: item.condition || '',
+      price: Number(item.sell_price || 0),
+      cost: Number(item.buy_price || 0),
+      fbaFee: Number(item.fba_fee || 0),
+      feePercent: 10
+    }));
+
+    invCurrentPage = 1;
+    renderInventoryList();
+
+  } catch (e) {
+    console.error(e);
+    if (tbody) {
+      tbody.innerHTML =
+        '<tr><td colspan="7" style="color:red; text-align:center;">取得エラー</td></tr>';
     }
-        
-    }
+  }
+}
 
     window.toggleLedgerView = function() {
       const table = document.getElementById('ledgerTable');
@@ -2054,6 +2066,10 @@ const supabase = window.supabase.createClient(
         loadExpenseListData();
       } catch(e) { alert("❌ 通信エラーが発生しました"); }
     }
+
+    // 🔧 起動時フリーズ修正: これまでfetchDashboardData()（ローダーを閉じる処理を含む）が
+    // ページ読み込み時に一度も呼ばれておらず、#loaderが消えないままになっていたため追加
+    fetchDashboardData();
   </script>
 </body>
 </html>
