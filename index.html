@@ -23,8 +23,11 @@
   <script>
     // 🔑 取得したURLと公開キーでSupabaseを初期化
     const SUPABASE_URL = "https://pxdxjlnoeqpfecovdhjl.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_eFu_C39G8tDL_aaTKeoMkQ_H8J9s3t0";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_ANON_KEY = "xxxxxxxx";
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
   </script>
   
   <style>
@@ -1709,12 +1712,7 @@
         if(tbody) tbody.innerHTML = '<tr><td colspan="7" style="color:red; text-align:center;">取得エラー</td></tr>'; 
       }
     }
-        ledgerCurrentPage = 1;
-        renderLedgerList();
-      } catch (err) {
-        resDiv.innerHTML = '<div class="card" style="text-align:center; color:#e53e3e; font-weight:bold; grid-column: 1 / -1;">❌ 通信エラーが発生しました</div>';
-        countEl.innerText = "通信失敗";
-      }
+        
     }
 
     window.toggleLedgerView = function() {
