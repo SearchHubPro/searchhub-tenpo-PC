@@ -310,25 +310,31 @@
     .pc-dashboard-top-wrapper { display: none; }
 
     @media (min-width: 768px) {
-      .pc-dashboard-top-wrapper {
-        display: grid;
-        grid-template-columns: 320px 1fr; 
-        gap: 24px;
-        margin: 0 24px 24px 24px;
-      }
-      .pc-forecast-panel, .pc-only-inventory-panel {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        overflow: hidden;
-        border: 1px solid #d5d9d9;
+      /* ...中略... */
+      #priceTable td, #ledgerTable td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; background: #fff; }
+      
+      /* 🚀 追加：PC版の時だけAmazonリサーチの結果をワイド横並びにするCSS */
+      #amazonResult .card[style*="display:flex"] {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 24px !important;
+        align-items: center !important;
       }
     }
     
-    /* 価格改定・販売管理テーブルPC用リファイン */
-    #priceTable, #ledgerTable { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; text-align: left; }
-    #priceTable th, #ledgerTable th { background: #edf2f7; color: #4a5568; font-weight: bold; padding: 12px 10px; position: sticky; top: 0; z-index: 5; box-shadow: 0 2px 0 0 #cbd5e0; }
-    #priceTable td, #ledgerTable td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; background: #fff; }
+    /* 🚀 追加：スマホ版（767px以下）の時は縦積みに強制変形させるCSS */
+    @media (max-width: 767px) {
+      #amazonResult div[style*="display:flex; flex-direction:row"] {
+        flex-direction: column !important;
+        gap: 16px !important;
+        align-items: center !important;
+        text-align: center !important;
+      }
+      #amazonResult .market-price-container {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -476,7 +482,35 @@
         <button class="dash-btn" onclick="openView('view-bulk-register')"><i class="fas fa-upload" style="color:#d69e2e;"></i>一括商品登録</button>
         
         <button class="dash-btn" onclick="openView('view-expense'); loadExpenseListData();"><i class="fas fa-file-invoice-dollar" style="color:#e53e3e;"></i>経費一覧</button>
+        <!-- 🚀 情報設定ボタンを復活 -->
+        <button class="dash-btn" onclick="openView('view-manager-settings'); loadInfoSettingsView();"><i class="fas fa-table" style="color:#4a5568;"></i>情報設定</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 🚀 情報設定画面のHTML本体を完全復刻 -->
+  <div id="view-manager-settings" class="view">
+    <div class="content">
+      <div class="card">
+        <h3 style="margin-top:0; color:#1a365d;"><i class="fas fa-store"></i> 仕入れ先マスタ設定 (改行区切り)</h3>
+        <textarea id="info-suppliers" rows="5" style="width:100%; padding:10px; border-radius:6px; border:1px solid #cbd5e0; box-sizing:border-box; font-size:14px; outline:none;"></textarea>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0; color:#1a365d;"><i class="fas fa-pen-fancy"></i> コンディション説明の定型文テンプレート</h3>
+        <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">ほぼ新品 (C列)</label>
+        <input type="text" id="info-cond-c" style="width:100%; padding:8px; box-sizing:border-box;">
+        <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">非常に良い (D列)</label>
+        <input type="text" id="info-cond-d" style="width:100%; padding:8px; box-sizing:border-box;">
+        <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">良い (E列)</label>
+        <input type="text" id="info-cond-e" style="width:100%; padding:8px; box-sizing:border-box;">
+        <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">可 (F列)</label>
+        <input type="text" id="info-cond-f" style="width:100%; padding:8px; box-sizing:border-box;">
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0; color:#1a365d;"><i class="fas fa-credit-card"></i> PC用クレジットカード支払い予測枠設定</h3>
+        <div id="info-cards-container" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </div>
+      <button onclick="saveInfoSettingsView()" style="width:100%; background:#1a365d; color:white; padding:14px; border:none; border-radius:8px; font-weight:bold; font-size:15px; cursor:pointer;">💾 設定内容を情報sheet（Supabase）へ一括全保存</button>
     </div>
   </div>
 
@@ -1126,21 +1160,21 @@
       }
       
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById(viewId).classList.add('active');
+      const targetView = document.getElementById(viewId);
+      if(targetView) targetView.classList.add('active');
       currentActiveView = viewId;
       
       const titleEl = document.getElementById('headerTitle');
       const backBtn = document.getElementById('backBtn');
-      
       const logoEl = document.getElementById('headerLogo');
       const textWrapperEl = document.getElementById('headerTextWrapper');
       
       if(viewId === 'view-home') {
-        backBtn.style.display = 'none';
+        if(backBtn) backBtn.style.display = 'none';
         if(logoEl) logoEl.style.display = 'block';
         if(textWrapperEl) textWrapperEl.style.display = 'none';
       } else {
-        backBtn.style.display = 'flex';
+        if(backBtn) backBtn.style.display = 'flex';
         if(logoEl) logoEl.style.display = 'none';
         if(textWrapperEl) textWrapperEl.style.display = 'block';
 
@@ -1152,52 +1186,28 @@
         else if(viewId === 'view-monthly-purchase') titleEl.innerText = '月別仕入情報';
         else if(viewId === 'view-monthly-sales') titleEl.innerText = '月別販売情報';
         else if(viewId === 'view-expense') titleEl.innerText = '経費一覧';
+        else if(viewId === 'view-manager-settings') titleEl.innerText = '情報設定';
       }
       
-      if (viewId === 'view-price') {
-        if (globalInventoryData.length === 0) loadInventoryPrice(); else renderInventoryList();
-      }
-      if (viewId === 'view-ledger') {
-        if (globalLedgerData.length === 0) loadLedgerData(); else renderLedgerList();
-      }
-      if (viewId === 'view-amazon') {
-        document.getElementById('amazonKw').value = '';
-        document.getElementById('amazonResult').style.display = 'none';
-        document.getElementById('amazon-container').classList.remove('search-active');
-        document.getElementById('amazonHistoryArea').style.display = 'grid';
-        loadAmazonHistory();
-      }
+      if (viewId === 'view-price') loadInventoryPrice();
+      if (viewId === 'view-ledger') loadLedgerData();
       window.scrollTo(0,0);
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-      setupSwipe();
-      document.getElementById('headerTitle').innerText = 'SearchHub Pro';
-      fetchDashboardData();
-    });
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        fetchDashboardData(); 
-      }
-    });
-
-    function openConfig() {
-      document.getElementById("cfgKeepa").value = AppStorage.get("sh_keepa", ""); 
-      document.getElementById("configModal").style.display = "flex";
-    }
-
-    function closeConfig() { document.getElementById("configModal").style.display = "none"; }
-    
-    function saveConfig() {
-      AppStorage.set("sh_keepa", document.getElementById("cfgKeepa").value.trim()); 
-      closeConfig(); 
-      fetchDashboardData();
+    // 🚀 表記揺れを goBackScreen に統一
+    function goBackScreen() { 
+      if (viewHistoryStack.length > 1) { 
+        openView(viewHistoryStack.pop(), true); 
+      } else { 
+        viewHistoryStack = ['view-home'];
+        openView('view-home', true); 
+      } 
     }
     
+    // 🚀 スワイプ連動バグを現行画面に修正
     function setupSwipe() {
       let touchStartX = 0; let touchStartY = 0;
-      const areas = [document.getElementById('content-monthly'), document.getElementById('view-home'), document.getElementById('view-amazon'), document.getElementById('view-price')];
+      const areas = [document.getElementById('view-home'), document.getElementById('view-amazon'), document.getElementById('view-price'), document.getElementById('view-ledger'), document.getElementById('view-expense')];
       
       areas.forEach(contentArea => {
         if(!contentArea) return;
@@ -1207,8 +1217,8 @@
           const diffY = e.changedTouches[0].clientY - touchStartY;
           
           if (Math.abs(diffX) > 50 && Math.abs(diffY) < 40) {
-            if (diffX > 50 && (currentActiveView === 'view-amazon' || currentActiveView === 'view-price')) {
-              openView('view-home'); return;
+            if (diffX > 50 && currentActiveView !== 'view-home') {
+              goBackScreen(); 
             }
           }
         }, {passive: true});
@@ -1664,14 +1674,15 @@
     async function loadLedgerData() {
       const resDiv = document.getElementById('ledgerResult');
       const countEl = document.getElementById('ledgerCount');
-      resDiv.innerHTML = '<div class="loading-spinner" style="grid-column: 1 / -1;">⌛ Supabaseからデータを同期中...</div>';
-      countEl.innerText = "同期中...";
+      if(resDiv) resDiv.innerHTML = '<tr><td colspan="8" class="loading-spinner">⌛ Supabaseから帳簿データを同期中...</td></tr>';
+      if(countEl) countEl.innerText = "同期中...";
       try {
         const { data, error } = await supabase.from('inventories').select('*').order('created_at', { ascending: false });
         if (error) throw error;
-        globalLedgerData = data.map(item => ({
+        
+        globalLedgerData = (data || []).map(item => ({
           id: item.id,
-          no: item.id.substring(0, 5), 
+          no: item.id.substring(0, 5),
           status: item.status || '出品中',
           supplier: item.supplier || '',
           url: item.purchase_url || '',
@@ -1683,15 +1694,48 @@
           condition: item.condition || '',
           sellDate: item.sell_date || '',
           orderNum: item.order_num || '',
-          buyPrice: item.buy_price || 0,
-          expense: item.shipping_cost || 0,
-          estPrice: item.sell_price || 0,
-          sales: item.sell_price || 0,
-          shipping: item.shipping_cost || 0,
-          fee: item.referral_fee || 0,
-          estFbaFee: item.fba_fee || 0,
-          profit: (item.sell_price||0) - (item.buy_price||0) - (item.shipping_cost||0) - (item.fba_fee||0) - (item.referral_fee||0)
+          buyPrice: Number(item.buy_price || 0),
+          expense: Number(item.shipping_cost || 0),
+          estPrice: Number(item.sell_price || 0),
+          sales: Number(item.sell_price || 0),
+          shipping: Number(item.shipping_cost || 0),
+          fee: Number(item.referral_fee || 0),
+          estFbaFee: Number(item.fba_fee || 0),
+          profit: Number(item.sell_price || 0) - Number(item.buy_price || 0) - Number(item.shipping_cost || 0) - Number(item.fba_fee || 0) - Number(item.referral_fee || 0)
         }));
+        ledgerCurrentPage = 1;
+        renderLedgerList();
+      } catch (err) {
+        console.error(err);
+        if(resDiv) resDiv.innerHTML = '<tr><td colspan="8" style="text-align:center; color:red; font-weight:bold;">❌ Supabase接続エラー</td></tr>';
+      }
+    }
+
+    async function loadInventoryPrice() {
+      const tbody = document.getElementById('priceResult');
+      const countEl = document.getElementById('inventoryCount');
+      if(tbody) tbody.innerHTML = '<tr><td colspan="7" class="loading-spinner">⌛ 在庫抽出中...</td></tr>';
+      try {
+        const { data, error } = await supabase.from('inventories').select('*').in('status', ['出品中', '納品待ち']);
+        if (error) throw error;
+        
+        globalInventoryData = (data || []).map(item => ({
+          id: item.id,
+          title: item.title || '',
+          asin: item.asin || '',
+          sku: item.sku || '',
+          condition: item.condition || '',
+          price: Number(item.sell_price || 0),
+          cost: Number(item.buy_price || 0),
+          fbaFee: Number(item.fba_fee || 0),
+          feePercent: 10
+        }));
+        invCurrentPage = 1; renderInventoryList();
+      } catch(e) { 
+        console.error(e);
+        if(tbody) tbody.innerHTML = '<tr><td colspan="7" style="color:red; text-align:center;">取得エラー</td></tr>'; 
+      }
+    }
         ledgerCurrentPage = 1;
         renderLedgerList();
       } catch (err) {
