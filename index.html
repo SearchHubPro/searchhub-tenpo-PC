@@ -169,6 +169,14 @@
       object-fit: cover;        /* 🚀 カメラ映像を横長の枠内に隙間なくフィットさせる */
     }
   </style>
+  <!-- 🚀 SupabaseのJavaScript SDKを読み込み -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 🔑 取得したURLと公開キーでSupabaseを初期化（グローバルでどこからでも使えるようにする）
+    const SUPABASE_URL = "https://pxdxjlnoeqpfecovdhjl.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_eFu_C39G8tDL_aaTKeoMkQ_H8J9s3t0";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </script>
 </head>
 <body>
   <div id="ptr-indicator">⬇️ 引っ張って更新...</div>
@@ -1467,81 +1475,80 @@ document.getElementById("regPurchaseUrl").value = "";
       const url = document.getElementById("regPurchaseUrl").value.trim();
       const idInput = document.getElementById("regPurchaseId");
       
-      if (!url) return; // URLが空なら何もしない
+      if (!url) return;
 
       let extractedId = "";
-      
-      // ① メルカリ特化（URLの中にmから始まる数字があれば絶対それ）
       const mercariMatch = url.match(/(m\d{9,})/);
       if (mercariMatch) {
         extractedId = mercariMatch[1];
       } else {
-        // ② その他のサイト（ヤフオク、ヤフフリなど）
-        // 大体のサイトは、URLの「/」で区切られた一番最後が商品IDになってる法則を利用！
         try {
           const urlObj = new URL(url);
           const paths = urlObj.pathname.split('/').filter(p => p !== '');
           if (paths.length > 0) {
              let lastPart = paths[paths.length - 1];
-             lastPart = lastPart.split('?')[0]; // 「?」以降の余計なパラメーターをカット
+             lastPart = lastPart.split('?')[0];
              extractedId = lastPart;
           }
-        } catch(e) {
-          // URLの形式じゃない場合はスルー
-        }
+        } catch(e) {}
       }
 
-      // 抜き出したIDがあって、かつID欄がまだ空っぽの時だけ自動入力！
       if (extractedId && !idInput.value) {
         idInput.value = extractedId;
       }
     };
 
+    // ⭕ 【完全クリーン版】Supabase直結・仕入れ登録関数
     window.executeRegistration = async function() {
       const supplier = document.getElementById("supplierSelect").value;
       if (!supplier) { return alert("仕入れ先を選択してください！"); }
 
       pendingRegData.supplier = supplier;
-
       pendingRegData.purchaseUrl = document.getElementById("regPurchaseUrl").value.trim();
       pendingRegData.purchaseId = document.getElementById("regPurchaseId").value.trim();
 
       const btn = document.getElementById("executeRegBtn");
-      
-      // 👇 ここから修正：ResearcherのURLを取得
-      const ssUrl = AppStorage.get("sh_ssurl", "");
-      const researcherUrl = AppStorage.get("sh_researcher_url", ""); // 🌟 追加
-      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
+      btn.disabled = true; btn.innerHTML = "⌛ Supabaseへ爆速登録中...";
 
-      btn.disabled = true; btn.innerHTML = "⌛ 登録中...";
       try {
-        const res = await fetch(targetGasUrl, { 
-          method: 'POST', 
-          // 👇 GASに送るボディ部分に researcherUrl を追加
-          body: JSON.stringify({ 
-            command: 'register', 
-            ssUrl: ssUrl, 
-            researcherUrl: researcherUrl, // 🌟 追加
-            data: pendingRegData 
-          }) 
-        });
-        const resJson = await res.json();
-        
-        if (resJson.success) {
-          btn.style.background = "#38a169"; btn.innerHTML = "✅ 登録完了！";
-          setTimeout(() => {
-            closeConfirmModal();
-            btn.style.background = "#1a365d"; btn.innerHTML = "この内容で登録"; btn.disabled = false;
-          }, 1500);
-        } else {
-          alert("登録失敗: " + resJson.message);
-          btn.disabled = false; btn.innerHTML = "🚀 再試行";
-        }
+        // 🚀 GASへの通信を完全撤去し、Supabaseの inventories テーブルへダイレクト保存！
+        const { data, error } = await supabase
+          .from('inventories')
+          .insert([
+            {
+              asin: pendingRegData.asin,
+              jan: document.getElementById('amazonKw').value.trim(), 
+              title: pendingRegData.title,
+              model: pendingRegData.model,
+              buy_price: parseInt(pendingRegData.buyPrice) || 0,
+              shipping_cost: parseInt(pendingRegData.shipping) || 0,
+              sell_price: parseInt(pendingRegData.sellPrice) || 0,
+              fba_fee: parseInt(pendingRegData.fbaFee) || 0,
+              referral_fee: parseInt(pendingRegData.fee) || 0,
+              supplier: pendingRegData.supplier,
+              purchase_url: pendingRegData.purchaseUrl,
+              purchase_id: pendingRegData.purchaseId,
+              status: '出品中',
+              // ⚠️ テスト用の固定UUID（認証実装時にログインユーザーIDへ紐付け）
+              user_id: '00000000-0000-0000-0000-000000000000' 
+            }
+          ])
+          .select();
+
+        if (error) throw error;
+
+        btn.style.background = "#38a169"; btn.innerHTML = "✅ Supabase登録完了！";
+        setTimeout(() => {
+          closeConfirmModal();
+          btn.style.background = "#1a365d"; btn.innerHTML = "この内容で登録"; btn.disabled = false;
+        }, 1500);
+
       } catch(err) {
-        alert("通信エラーが発生しました");
+        console.error("Supabase登録エラー:", err);
+        alert("登録に失敗しました: " + err.message);
         btn.disabled = false; btn.innerHTML = "🚀 再試行";
       }
-    }
+    };
 
     window.calcSimProfit = function(id, cost, fbaFee, feePercent) {
       const actualFeePercent = feePercent || 10; 
@@ -2159,7 +2166,7 @@ document.getElementById("regPurchaseUrl").value = "";
       }
     }
 
-    // 💸 登録ボタンを押した時の送信処理
+    // ⭕ 【進化版】経費登録もSupabase直結で爆速処理！
     async function submitExpense() {
       const month = document.getElementById('expMonth').value.trim();
       const amount = document.getElementById('expAmount').value.trim();
@@ -2176,41 +2183,41 @@ document.getElementById("regPurchaseUrl").value = "";
       const memo = document.getElementById('expMemo').value.trim();
 
       const btn = document.getElementById('expSubmitBtn');
-      btn.innerText = "⌛ 登録中...";
+      btn.innerText = "⌛ Supabaseへ登録中...";
       btn.disabled = true;
 
-      const ssUrl = AppStorage.get("sh_ssurl", "");
-      let targetGasUrl = AppStorage.get("sh_tensite_url", "") || AppStorage.get("sh_sniper_url", "");
-
       try {
-        const res = await fetch(targetGasUrl, {
-          method: 'POST',
-          body: JSON.stringify({
-            command: 'registerExpense',
-            ssUrl: ssUrl,
-            data: { month: month, date: date, type: type, amount: amount, memo: memo }
-          })
-        });
-        const json = await res.json();
-        
-        if (json.success) {
-          btn.style.background = "#38a169";
-          btn.innerText = "✅ 登録完了！";
-          setTimeout(() => {
-            closeExpenseModal();
-            btn.style.background = "#e53e3e";
-            btn.innerText = "🚀 経費を登録";
-            btn.disabled = false;
-            // もし月別データ画面を開いてたら自動で再読込する
-            if (currentActiveView === 'view-monthly') loadMonthlyData();
-          }, 1500);
-        } else {
-          alert("エラー: " + json.message);
+        // 🚀 expensesテーブルへダイレクトインサート！
+        const { data, error } = await supabase
+          .from('expenses')
+          .insert([
+            {
+              target_month: month,
+              expense_date: date || new Date().toISOString().split('T')[0], // 空なら今日の日付
+              expense_type: type,
+              amount: parseInt(amount) || 0,
+              memo: memo,
+              // ⚠️ テスト用の固定UUID
+              user_id: '00000000-0000-0000-0000-000000000000'
+            }
+          ])
+          .select();
+
+        if (error) throw error;
+
+        btn.style.background = "#38a169";
+        btn.innerText = "✅ 登録完了！";
+        setTimeout(() => {
+          closeExpenseModal();
+          btn.style.background = "#e53e3e";
           btn.innerText = "🚀 経費を登録";
           btn.disabled = false;
-        }
+          if (currentActiveView === 'view-monthly') loadMonthlyData();
+        }, 1500);
+
       } catch(e) {
-        alert("通信エラーが発生しました");
+        console.error("経費登録エラー:", e);
+        alert("通信エラーが発生しました: " + e.message);
         btn.innerText = "🚀 経費を登録";
         btn.disabled = false;
       }
