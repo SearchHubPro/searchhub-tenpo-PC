@@ -36,42 +36,17 @@
     .header h1 { margin: 0; font-size: 18px; font-weight: bold; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   
     .header-right { display: flex; gap: 14px; align-items: center; z-index: 2; justify-content: flex-end; }
     
-    .header-btn { background: none; border: none; color: #333; font-size: 18px; cursor: pointer; outline: none; padding: 5px; transition: transform 0.5s ease; display: flex; align-items: center; justify-content: center;}
-    .last-update { display: none !important; }  
-    .discord-btn { font-size: 20px; transition: color 0.3s, transform 0.1s; }
-    .discord-btn:active { transform: scale(0.9); }
-    .discord-on { color: #5865F2 !important; }
-    .discord-off { color: #4a5568 !important; opacity: 0.4; }
+    .header-btn { background: none; border: none; color: #333; font-size: 18px; cursor: pointer; outline: none; padding: 5px; display: flex; align-items: center; justify-content: center;}
 
     .view { display: none; padding-top: 0 !important; margin-top: 0 !important; }
     .view.active { display: block; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     
-    .drop-zone { border: 2px dashed #cbd5e0; border-radius: 12px; padding: 40px 20px; text-align: center; background: #f8fafc; transition: all 0.3s ease; }
-    .drop-zone.dragover { border-color: #3182ce; background: #ebf8ff; transform: scale(1.02); }
-    .drop-icon { font-size: 48px; color: #a0aec0; margin-bottom: 12px; transition: color 0.3s; }
-    .drop-zone.dragover .drop-icon { color: #3182ce; }
-    .drop-text { font-size: 15px; font-weight: bold; color: #4a5568; }
-    .file-btn { display: inline-block; background: #3182ce; color: white; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
-    .file-btn:hover { background: #2b6cb0; }
-    
-    .graph-card { background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 16px; border: 1px solid #d5d9d9; min-height: 290px; }
+    .graph-card { background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin: 16px; border: 1px solid #d5d9d9; min-height: 240px; }
     .home-top-tabs { display: flex; justify-content: flex-start; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid #d5d9d9; }
     .home-tab-btn { padding: 8px 12px; border: none; font-size: 13px; font-weight: bold; background: transparent; color: #565959; cursor: pointer; border-bottom: 3px solid transparent; flex: 1; text-align: center; }
     .home-tab-btn.active { color: #008296; border-bottom: 3px solid #008296; }
-    .summary-header { margin-bottom: 16px; height: 50px; }
-    .summary-date { font-size: 11px; color: #565959; margin-bottom: 4px; font-weight:bold; }
-    .summary-values { display: flex; gap: 20px; align-items: flex-end; }
-    .summary-box .summary-label { font-size: 10px; color: #565959; margin-bottom: 2px; }
-    .summary-box .summary-value { font-size: 20px; font-weight: 900; color: #0f1111; line-height: 1; }
-    .summary-box .summary-value.highlight { color: #E47911; }
-    .chart-wrapper { height: 200px; width: 100%; position: relative; }
     
-    #homeMonthTabsArea { display: flex; overflow-x: auto; gap: 8px; margin-top: 16px; padding-bottom: 8px; }
-    #homeMonthTabsArea::-webkit-scrollbar { display: none; }
-    .home-month-btn { padding: 6px 16px; border: 1px solid #d5d9d9; border-radius: 20px; background: #ffffff; color: #0f1111; font-size: 12px; white-space: nowrap; cursor: pointer; }
-    .home-month-btn.active { background: #f3fbfd; border-color: #008296; color: #008296; font-weight: bold; }
-
     .turnover-container { display: block; padding-bottom: 16px; }
     .turnover-row-1 { display: flex; flex-direction: column; gap: 16px; width: 100%; align-items: center; }
     
@@ -80,42 +55,16 @@
     .metric-item { display: flex; justify-content: space-between; font-size: 11px; color: #565959; border-bottom: 1px dashed #eee; padding-bottom: 2px; }
     .metric-value { font-weight: bold; color: #0f1111; }
     .metric-value.profit { color: #E47911; }
-    .chart-box { position: relative; display: flex; justify-content: center; align-items: center; }
-    .circular-chart { width: 120px; height: 120px; }
-    .circle-bg { fill: none; stroke: #e6e6e6; stroke-width: 3.8; }
-    .circle-base { fill: none; stroke: #008296; stroke-width: 3.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
-    .circle-over { fill: none; stroke: #E47911; stroke-width: 3.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out 0.5s; }
-    .percentage { position: absolute; font-family: 'Roboto', sans-serif; font-size: 24px; font-weight: 900; color: #0f1111; display: flex; flex-direction: column; align-items: center; }
-    .percentage span { font-size: 9px; color: #565959; margin-top: -3px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
 
     .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 20px 16px; }
     .dash-btn { position: relative; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 10px; text-align: center; color: #1a365d; font-weight: bold; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.1s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;}
     .dash-btn:active { transform: scale(0.95); background: #f8fafc; }
     .dash-btn i { font-size: 26px; }
-    .dash-dot { display: none; position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background-color: #e53e3e; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); border: 2px solid white; }
-    .dash-dot.active { display: block; animation: pop 0.3s ease; }
 
-    .tabs-container { background-color: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: calc(52px + env(safe-area-inset-top)); z-index: 99; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 !important; padding: 0 !important; }
-    .tabs-container::-webkit-scrollbar { display: none; }
-    .tabs { display: flex; white-space: nowrap; padding: 0 4px; margin: 0 !important; }
-    .tab-btn { position: relative; padding: 12px 14px; background: none; border: none; font-size: 12px; font-weight: bold; color: #718096; border-bottom: 3px solid transparent; outline: none; flex-shrink: 0; margin: 0; }
-    .tab-btn.active { color: #2b6cb0; border-bottom-color: #2b6cb0; background-color: #ebf8ff; }
-    .tab-dot { display: none; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background-color: #e53e3e; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .tab-dot.active { display: block; animation: pop 0.3s ease; }
-    @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-    
     .content { padding: 12px; min-height: 80vh; transform: translate3d(0,0,0); }   
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
     
     .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; }
-    .card.read-card { background: #e9ecef !important; opacity: 0.55; border-color: #ced4da !important; box-shadow: none; }
-    .card.read-card .item-title a { color: #6c757d !important; }
-    .card.read-card .price-tag { color: #6c757d !important; }
-    .card.read-card .status-tag { color: #6c757d !important; }
-    .card.read-card .auto-asin-btn { background: #6c757d !important; opacity: 0.7; }
 
-    .no-data { text-align: center; color: #a0aec0; padding: 30px 10px; font-size: 12px; }
     .loading-spinner { text-align: center; padding: 40px; font-size: 13px; color: #2b6cb0; font-weight: bold; }
 
     .search-box { display: flex; gap: 6px; margin-bottom: 12px; }
@@ -138,13 +87,6 @@
     
     .register-btn { background: #243c5a; color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 14px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); transition: background 0.2s; }
     
-    .item-title { font-size: 13px; font-weight: bold; margin-bottom: 6px; }
-    .item-title a { color: #2b6cb0; text-decoration: none; display: block; line-height: 1.4; word-break: break-all; }
-    .item-meta { font-size: 11px; color: #718096; display: flex; justify-content: space-between; align-items: center; }
-    .status-tag { color: #e53e3e; font-weight: bold; }
-    .price-tag { color: #07A27B; font-size: 14px; font-weight: 900; }
-    .auto-asin-btn { background: #ff9900; color: #fff; border: none; padding: 8px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; margin-top:8px;}
-
     #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s; }
     .splash-img { width: 100%; height: 100%; object-fit: cover; }
     .splash-text { position: absolute; bottom: 60px; color: white; font-size: 14px; font-weight: bold; letter-spacing: 2px; animation: pulse 1.5s infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
@@ -157,157 +99,31 @@
     .modal-content input { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
     .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
     .modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
-    
-    #ptr-indicator { position: fixed; top: -50px; left: 0; width: 100%; text-align: center; z-index: 1000; transition: top 0.3s; font-weight: bold; color: #008296; font-size: 13px; background: rgba(255,255,255,0.95); padding: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 0 0 12px 12px; pointer-events: none;}
 
-    /* =========================================================================
-       🚀 PC最適化 (Amazon・Yahoo風のワイド画面対応) 
-       ========================================================================= */
     @media (min-width: 768px) {
-      .header { padding: calc(16px + env(safe-area-inset-top)) 32px 16px 32px; margin: 0 !important; }
-      .header-left, .header-right { width: auto; }
-      
-      body {
-        max-width: 100%; 
-        margin: 0; 
-        background-color: #f2f4f8; 
-      }
-      .header-wrapper {
-        max-width: 100%; 
-        margin: 0 !important;
-        padding: 0 !important;
-      }
+      body { max-width: 100%; margin: 0; background-color: #f2f4f8; }
       .header h1 { font-size: 22px; }
       .view { background-color: transparent; }
       .content { padding: 24px; }
       
-      .dashboard-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 20px;
-        padding: 0 24px 30px 24px;
-      }
+      .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; padding: 0 24px 30px 24px; }
       .dash-btn { padding: 24px 10px; font-size: 14px; }
       .dash-btn i { font-size: 32px; margin-bottom: 4px; }
-      .dash-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); background-color: #f8fafc; }
 
-      .tab-content.active {
-        display: grid !important; 
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-        gap: 16px;
-      }
-
-      #amazonHistoryArea {
-        display: grid !important;
-        flex-direction: row !important;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 12px;
-        align-content: start;
-      }
-      #amazon-container { transition: all 0.3s ease; }
-      #amazon-container.search-active {
-        display: grid;
-        grid-template-columns: 300px minmax(0, 1fr);
-        gap: 24px;
-        align-items: start;
-      }
-      #amazon-container.search-active #amazonHistoryArea {
-        display: flex !important;
-        flex-direction: column !important;
-        max-height: calc(100vh - 180px);
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding-right: 8px; 
-      }
-      #amazon-container.search-active #amazonHistoryArea > .card,
-      #amazon-container.search-active #amazonHistoryArea > div { flex-shrink: 0 !important; }
-      #amazon-container.search-active #amazonHistoryArea::-webkit-scrollbar { width: 6px; }
-      #amazon-container.search-active #amazonHistoryArea::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
-      #amazon-container.search-active #amazonResult > .card { max-width: 100% !important; margin: 0 !important; }
-      
-      .card { margin-bottom: 0 !important; }
-      .card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-color: #cbd5e0; }
-      .loading-spinner, .no-data { grid-column: 1 / -1; }
-      #amazonResult > .card { max-width: 800px; margin: 0 auto !important; }
-
-      .graph-card { margin: 24px; }
-      
-      .turnover-container { 
-        display: block; 
-        max-width: 1050px; 
-        margin: 0 auto; 
-        padding: 10px 0;
-      }
-      .turnover-row-1 {
-        display: grid !important;
-        grid-template-columns: 160px 1fr 220px !important; 
-        gap: 32px; 
-        width: 100%;
-        align-items: stretch;
-      }
-      .metrics-list {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr; 
-        gap: 12px 24px; 
-        background: #f8fafc; 
-        padding: 20px 30px;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        align-content: center;
-      }
-      .metrics-list > div:first-child {
-        grid-column: 1 / -1; 
-        font-size: 15px !important;
-        border-bottom: 2px solid #cbd5e0;
-        padding-bottom: 8px;
-        margin-bottom: 4px;
-      }
-      .metric-item {
-        font-size: 13px !important; 
-        border-bottom: 1px dashed #cbd5e0;
-      }
-      .circular-chart {
-        width: 180px !important; 
-        height: 180px !important;
-      }
-      
-      .tabs-container { top: 55px !important; box-shadow: 0 -30px 0 #ffffff !important; margin: 0 !important; padding: 0 !important; }
-      .tabs { justify-content: flex-start; padding: 0 24px; border-bottom: 2px solid #e2e8f0; margin: 0 !important; }
-      .tab-btn { padding: 16px 24px; font-size: 14px; cursor: pointer; margin: 0; }
-      .tab-btn:hover { background-color: #f8fafc; }
-      
-      .modal-content { max-width: 500px; }
-      button { cursor: pointer; transition: opacity 0.2s; }
-      button:hover { opacity: 0.9; }
+      #priceTable, #ledgerTable { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; text-align: left; }
+      #priceTable th, #ledgerTable th { background: #edf2f7; color: #4a5568; font-weight: bold; padding: 12px 10px; position: sticky; top: 0; z-index: 5; box-shadow: 0 2px 0 0 #cbd5e0; }
+      #priceTable td, #ledgerTable td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; background: #fff; }
     }
 
     .pc-dashboard-top-wrapper { display: none; }
-
     @media (min-width: 768px) {
-      .pc-dashboard-top-wrapper {
-        display: grid;
-        grid-template-columns: 320px 1fr; 
-        gap: 24px;
-        margin: 0 24px 24px 24px;
-      }
-      .pc-forecast-panel, .pc-only-inventory-panel {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        overflow: hidden;
-        border: 1px solid #d5d9d9;
-      }
+      .pc-dashboard-top-wrapper { display: grid; grid-template-columns: 320px 1fr; gap: 24px; margin: 0 24px 24px 24px; }
+      .pc-only-inventory-panel { background: #ffffff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #d5d9d9; }
     }
-    
-    /* 価格改定・販売管理テーブルPC用リファイン */
-    #priceTable, #ledgerTable { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; text-align: left; }
-    #priceTable th, #ledgerTable th { background: #edf2f7; color: #4a5568; font-weight: bold; padding: 12px 10px; position: sticky; top: 0; z-index: 5; box-shadow: 0 2px 0 0 #cbd5e0; }
-    #priceTable td, #ledgerTable td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; background: #fff; }
   </style>
   
-  <!-- 🚀 SupabaseのJavaScript SDKを読み込み -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 🔑 スマホ・PC共通のSupabase接続クライアント
     const SUPABASE_URL = "https://pxdxjlnoeqpfecovdhjl.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_eFu_C39G8tDL_aaTKeoMkQ_H8J9s3t0";
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -325,14 +141,12 @@
     <div class="header">
       <div class="header-left">
         <button class="header-btn" id="backBtn" style="display:none;" onclick="goBackScreen()"><i class="fas fa-chevron-left"></i></button>
-        <button class="header-btn" style="position:relative; z-index:9999;" onclick="openConfig()"><i class="fas fa-cog"></i></button>
-        <button class="header-btn discord-btn discord-off" id="dcToggleBtn" onclick="toggleDiscord()"><i class="fab fa-discord"></i></button>
+        <button class="header-btn" onclick="openConfig()"><i class="fas fa-cog"></i></button>
       </div>
       <div class="header-center">
         <img id="headerLogo" src="https://i.ibb.co/1f3CYVjV/2026-06-04-111628.png" style="height: 28px; display: block; margin: 0 auto; object-fit: contain;">
         <div id="headerTextWrapper" style="display: none;">
           <h1 id="headerTitle">SearchHub Pro</h1>
-          <div class="last-update" id="lastUpdate">待機中...</div>
         </div>
       </div>
       <div class="header-right"></div>
@@ -342,117 +156,62 @@
   <!-- 1. ホーム画面 -->
   <div id="view-home" class="view active">
     <div class="graph-card">
-      <div class="home-top-tabs">
-        <button class="home-tab-btn active" onclick="switchHomeTab('turnover', this)">ダッシュボード</button>
-        <button class="home-tab-btn" onclick="switchHomeTab('purchase', this)">仕入</button>
-        <button class="home-tab-btn" onclick="switchHomeTab('sales', this)">販売</button>
-      </div>
       <div id="homeGraphContent">
         <div style="text-align:center; padding:30px; color:#a0aec0; font-size:12px;">⌛ データを同期中...</div>
       </div>
-      <div id="homeMonthTabsArea" style="display:none;"></div>
     </div>
     
     <div class="pc-dashboard-top-wrapper">
-      <div class="pc-forecast-panel">
-        <div style="background: #f7fafc; border-bottom: 1px solid #e2e8f0; padding: 16px; font-weight: bold; color: #1a365d; font-size: 14px; display:flex; align-items:center; gap:8px;">
-          <i class="fas fa-credit-card" style="color:#3182ce;"></i> 次回カード支払予測
-        </div>
-        <div id="forecast-container" style="padding: 16px; display:flex; flex-direction:column; gap:12px; max-height: 250px; overflow-y: auto;">
-          <div style="text-align:center; color:#a0aec0; font-size:12px; padding:20px;">⌛ 同期中...</div>
-        </div>
-      </div>
-
-      <div class="pc-only-inventory-panel" style="margin:0 !important; border:none; box-shadow:none; display: flex; flex-direction: column; height: 100%;">
-        <div style="display: flex; border-bottom: 1px solid #e2e8f0; background: #f7fafc; flex-shrink: 0;">
-          <button id="tab-current-inv" onclick="switchInvTab('current')" style="flex: 1; padding: 16px; font-weight: bold; border: none; background: #fff; border-bottom: 3px solid #3182ce; color: #2b6cb0; cursor: pointer; transition: 0.3s; font-size:14px;">
-            <i class="fas fa-box-open" style="margin-right:6px;"></i> リアルタイム現在庫
-          </button>
-          <button id="tab-monthly-inv" onclick="switchInvTab('monthly')" style="flex: 1; padding: 16px; font-weight: bold; border: none; background: transparent; border-bottom: 3px solid transparent; color: #718096; cursor: pointer; transition: 0.3s; font-size:14px;">
-            <i class="fas fa-calendar-alt" style="margin-right:6px;"></i> 月別在庫
-          </button>
-        </div>
-        
-        <div id="content-current-inv" style="flex: 1;">
-          <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; min-height: 180px; padding: 20px; box-sizing: border-box;">
-            <div style="display: flex; justify-content: space-around; align-items: center;">
-               <div style="text-align: center;">
-                 <div style="font-size: 13px; color: #718096; margin-bottom: 6px; font-weight:bold;">現在の売れ残り個数</div>
-                 <div style="font-size: 36px; font-weight: 900; color: #2d3748;" id="realtime-inv-count">-- <span style="font-size:16px;">個</span></div>
-               </div>
-               <div style="width: 1px; height: 60px; background: #e2e8f0;"></div>
-               <div style="text-align: center;">
-                 <div style="font-size: 13px; color: #718096; margin-bottom: 6px; font-weight:bold;">現在庫の仕入原価総額</div>
-                 <div style="font-size: 36px; font-weight: 900; color: #38a169;" id="realtime-inv-value">¥--</div>
-               </div>
-            </div>
-          </div>
-        </div>
-        
-        <div id="content-monthly-inv" style="flex: 1; display: none;">
-          <div style="display: flex; flex-direction: column; justify-content: center; height: 100%; min-height: 180px; padding: 20px; box-sizing: border-box;">
-            <div style="margin-bottom: 24px; text-align: center;">
-               <select id="monthly-inv-selector" onchange="renderMonthlyInventory()" style="padding: 10px 20px; border-radius: 6px; border: 1px solid #cbd5e0; font-size: 15px; font-weight: bold; color: #1a365d; outline:none; background:#fff; min-width: 180px;">
-                  <option value="">月を選択...</option>
-               </select>
-            </div>
-            <div style="display: flex; justify-content: space-around; align-items: center; border-top: 1px dashed #e2e8f0; padding-top: 24px;">
-               <div style="text-align: center;">
-                 <div style="font-size: 13px; color: #718096; margin-bottom: 6px; font-weight:bold;">期首在庫（月初め）</div>
-                 <div style="font-size: 32px; font-weight: 900; color: #2b6cb0;" id="val-kishu">¥--</div>
-               </div>
-               <div style="font-size: 28px; color: #cbd5e0;"><i class="fas fa-chevron-right"></i></div>
-               <div style="text-align: center;">
-                 <div style="font-size: 13px; color: #718096; margin-bottom: 6px; font-weight:bold;">期末在庫（月末）</div>
-                 <div style="font-size: 32px; font-weight: 900; color: #e53e3e;" id="val-kimatsu">¥--</div>
-               </div>
-            </div>
-          </div>
+      <div class="pc-only-inventory-panel" style="width:100%; padding:20px; box-sizing:border-box;">
+        <div style="display: flex; justify-content: space-around; align-items: center; min-height:100px;">
+           <div style="text-align: center;">
+             <div style="font-size: 13px; color: #718096; margin-bottom: 6px; font-weight:bold;">現在の売れ残り個数</div>
+             <div style="font-size: 36px; font-weight: 900; color: #2d3748;" id="realtime-inv-count">-- 個</div>
+           </div>
+           <div style="width: 1px; height: 60px; background: #e2e8f0;"></div>
+           <div style="text-align: center;">
+             <div style="font-size: 13px; color: #718096; margin-bottom: 6px; font-weight:bold;">現在庫の仕入原価総額</div>
+             <div style="font-size: 36px; font-weight: 900; color: #38a169;" id="realtime-inv-value">¥--</div>
+           </div>
         </div>
       </div>
     </div>
     
     <div class="dashboard-grid">
       <button class="dash-btn" onclick="openView('view-amazon')"><i class="fab fa-amazon" style="color:#ff9900;"></i>Amazon リサーチ</button>
-      <button class="dash-btn" onclick="openView('view-manager-menu')"><i class="fas fa-chart-bar" style="color:#1a365d;"></i>SearchHub Manager</button>
-      <button class="dash-btn" onclick="openView('view-researcher-menu')"><i class="fas fa-clipboard-check" style="color:#a855f7;"></i>SearchHub Researcher<span class="dash-dot" id="dash-dot-researcher"></span></button>
-      <button class="dash-btn" onclick="openView('view-watcher')"><i class="fas fa-eye" style="color:#07A27B;"></i>SearchHub Watcher<span class="dash-dot" id="dash-dot-watcher"></span></button>
-      <button class="dash-btn" onclick="openView('view-sniper')"><i class="fas fa-crosshairs" style="color:#e53e3e;"></i>SearchHub Sniper<span class="dash-dot" id="dash-dot-sniper"></span></button>
-      <button class="dash-btn" onclick="openSheetLinksModal()"><i class="fas fa-table" style="color:#3182ce;"></i>各種シート連携</button>
+      <button class="dash-btn" onclick="openView('view-ledger')"><i class="fas fa-book" style="color:#2b6cb0;"></i>販売管理（帳簿）</button>
+      <button class="dash-btn" onclick="openView('view-price')"><i class="fas fa-yen-sign" style="color:#1a365d;"></i>価格改定ツール</button>
+      <button class="dash-btn" onclick="openView('view-expense'); loadExpenseListData();"><i class="fas fa-file-invoice-dollar" style="color:#e53e3e;"></i>諸経費管理</button>
     </div>
   </div> 
 
-  <!-- 2. Manager メニュー -->
-  <div id="view-manager-menu" class="view">
+  <!-- 2. Amazonリサーチ画面 -->
+  <div id="view-amazon" class="view">
     <div class="content">
-      <div class="dashboard-grid">
-        <button class="dash-btn" onclick="openView('view-ledger')"><i class="fas fa-book" style="color:#2b6cb0;"></i>販売管理（帳簿）</button>
-        <button class="dash-btn" onclick="openView('view-price')"><i class="fas fa-yen-sign" style="color:#1a365d;"></i>価格改定ツール</button>
-        <button class="dash-btn" onclick="openView('view-monthly-purchase')"><i class="fas fa-box-open" style="color:#2f855a;"></i>月別仕入データ</button>
-        <button class="dash-btn" onclick="openView('view-monthly-sales')"><i class="fas fa-hand-holding-usd" style="color:#c53030;"></i>月別販売データ</button>
-        <button class="dash-btn" onclick="openView('view-expense'); loadExpenseListData();"><i class="fas fa-file-invoice-dollar" style="color:#e53e3e;"></i>諸経費管理</button>
+      <div class="search-box">
+        <input type="text" id="amazonKw" placeholder="ASINや型番を入力...">
+        <button onclick="runAmazonResearch()" id="searchBtn">解析</button>
+      </div>
+      <div id="amazon-container">
+        <div id="amazonHistoryArea" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
+        <div id="amazonResult">
+          <div class="card" style="text-align:center; color:#a0aec0; padding:20px; font-size:12px;">ASINやキーワードを入力して解析ボタンを押してな！</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- 3. 販売管理（帳簿一覧）画面 -->
+  <!-- 3. 販売管理画面 -->
   <div id="view-ledger" class="view">
     <div class="content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <div style="display:flex; gap:8px; align-items:center;">
-          <button onclick="loadLedgerData()" style="background:#1a365d; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-            <i class="fas fa-sync-alt"></i> 最新データ抽出
-          </button>
-          <span style="font-size:12px; font-weight:bold; color:#4a5568;" id="ledgerCount">表示中: ---件</span>
-        </div>
+        <button onclick="loadLedgerData()" style="background:#1a365d; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:bold;">
+          <i class="fas fa-sync-alt"></i> 最新データ抽出
+        </button>
+        <span style="font-size:12px; font-weight:bold; color:#4a5568;" id="ledgerCount">表示中: ---件</span>
       </div> 
       <div class="search-box" style="margin-bottom:16px;">
         <input type="text" id="ledger-search-kw" placeholder="SKU・ASIN・商品名・仕入先で高速検索..." oninput="ledgerCurrentPage=1; renderLedgerList();" style="flex:2;">
-        <select id="ledger-status-filter" onchange="ledgerCurrentPage=1; renderLedgerList();" style="flex:1; padding:10px; border-radius:8px; border:1px solid #ccc; font-weight:bold; color:#1a365d;">
-          <option value="ALL">すべてのステータス</option>
-          <option value="出品中">📦 出品中</option> 
-          <option value="販売済">💰 販売完了</option>
-        </select>
       </div>
       <div style="overflow: auto; max-height: 65vh; background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
         <table id="ledgerTable">
@@ -470,11 +229,6 @@
           <tbody id="ledgerResult"></tbody>
         </table>
       </div>
-      <div id="ledger-pagination" class="pagination" style="display:none;">
-        <button class="page-btn" id="ledger-btn-prev" onclick="ledgerCurrentPage--; renderLedgerList();">◀ 前へ</button>
-        <span class="page-info" id="ledger-page-info">1 / 1</span>
-        <button class="page-btn" id="ledger-btn-next" onclick="ledgerCurrentPage++; renderLedgerList();">次へ ▶</button>
-      </div>
     </div>
   </div>
 
@@ -487,26 +241,21 @@
           <i class="fas fa-sync-alt"></i> 在庫同期
         </button>
       </div>
-      <input type="text" id="price-search-kw" class="search-bar-only" placeholder="ASINや商品名、SKUでリアルタイム絞り込み..." oninput="invCurrentPage=1; renderInventoryList();">
+      <input type="text" id="price-search-kw" class="search-bar-only" placeholder="ASINや商品名で一発検索..." oninput="invCurrentPage=1; renderInventoryList();">
       <div style="overflow: auto; max-height: 65vh; background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
         <table id="priceTable">
           <thead>
             <tr>
               <th style="width: 60px; text-align:center;">画像</th>
               <th>商品マスタ（SKU・ASIN）</th>
-              <th style="width: 120px;">現在カート / 原価</th>
-              <th style="width: 120px; text-align:center;">想定売価テスト</th>
+              <th style="width: 120px;">現在価格 / 原価</th>
+              <th style="width: 120px; text-align:center;">改定価格テスト</th>
               <th style="width: 110px; text-align:right;">手残り利益</th>
               <th style="width: 100px; text-align:center;">操作</th>
             </tr>
           </thead>
           <tbody id="priceResult"></tbody>
         </table>
-      </div>
-      <div id="price-pagination" class="pagination" style="display:none;">
-        <button class="page-btn" id="price-btn-prev" onclick="invCurrentPage--; renderInventoryList();">◀ 戻る</button>
-        <span class="page-info" id="price-page-info">1 / 1</span>
-        <button class="page-btn" id="price-btn-next" onclick="invCurrentPage++; renderInventoryList();">次へ ▶</button>
       </div>
     </div>
   </div>
@@ -516,9 +265,7 @@
     <div class="content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h2 style="font-size:18px; margin:0; color:#1a365d;"><i class="fas fa-file-invoice-dollar"></i> 経費一覧データ</h2>
-        <div style="display:flex; gap:10px;">
-          <button onclick="openExpenseModal()" style="background:#e53e3e; color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold;"><i class="fas fa-plus-circle"></i> 新規経費入力</button>
-        </div>
+        <button onclick="openExpenseModal()" style="background:#e53e3e; color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold;"><i class="fas fa-plus-circle"></i> 新規経費入力</button>
       </div>
       <div style="overflow: auto; max-height: 70vh; background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
         <table id="expenseTable" style="width:100%;">
@@ -538,17 +285,30 @@
     </div>
   </div>
 
-  <!-- モーダル各種（仕入れ最終確認） -->
+  <!-- 各種設定モーダル（歯車ボタンで起動） -->
+  <div id="configModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom:12px;">⚙️ Keepa API 設定</h3>
+      <label>Keepa APIキー</label>
+      <input type="text" id="cfgKeepa" placeholder="あなたのKeepaAPIキーを入力してな">
+      <div class="modal-actions" style="margin-top:20px;">
+        <button style="background:#e2e8f0; color:#4a5568;" onclick="closeConfig()">閉じる</button>
+        <button style="background:#1a365d; color:white;" onclick="saveConfig()">設定を保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 仕入れ登録最終確認モーダル -->
   <div id="confirmRegisterModal" class="modal">
     <div class="modal-content">
       <h3>🚀 仕入れ登録の最終確認</h3>
       <div id="confirmDetails" style="font-size:13px; color:#4a5568; margin-bottom:12px; line-height:1.6; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;"></div>
       <label>仕入れ先を選択</label>
-      <select id="supplierSelect" style="width:100%; padding:10px; margin-top:4px; margin-bottom:12px; border:1px solid #ccc; border-radius:6px; font-size:14px; background:#fff; outline:none;"></select>
-      <label>購入URL</label>
+      <select id="supplierSelect" style="width:100%; padding:10px; margin-top:4px; margin-bottom:12px; border:1px solid #ccc; border-radius:6px; background:#fff; outline:none;"></select>
+      <label>購入URL (任意)</label>
       <input type="text" id="regPurchaseUrl" placeholder="https://..." oninput="autoExtractId()" style="width:100%; padding:10px; margin-top:4px; margin-bottom:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
-      <label>商品ID</label>
-      <input type="text" id="regPurchaseId" placeholder="m123456789など" style="width:100%; padding:10px; margin-top:4px; margin-bottom:16px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+      <label>商品ID (任意)</label>
+      <input type="text" id="regPurchaseId" placeholder="商品IDや管理番号" style="width:100%; padding:10px; margin-top:4px; margin-bottom:16px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
       <div class="modal-actions">
         <button style="background:#e2e8f0; color:#4a5568;" onclick="closeConfirmModal()">キャンセル</button>
         <button id="executeRegBtn" style="background:#1a365d; color:white;" onclick="executeRegistration()">Supabaseへ登録</button>
@@ -556,396 +316,274 @@
     </div>
   </div>
 
-  <!-- モーダル（経費新規入力窓） -->
-  <div id="expenseModal" class="modal">
-    <div class="modal-content">
-      <h3 style="color:#e53e3e; margin-top:0; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">💸 経費データダイレクト追加</h3>
-      <div style="display:flex; gap:8px;">
-        <div style="flex:1;">
-          <label>発生月 (必須)</label>
-          <input type="text" id="expMonth" placeholder="2026/07" style="width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
-        </div>
-        <div style="flex:1;">
-          <label>日付</label>
-          <input type="text" id="expDate" placeholder="2026/07/18" style="width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
-        </div>
-      </div>
-      <label style="display:block; margin-top:12px;">経費の種類</label>
-      <select id="expTypeSelect" onchange="toggleExpTypeInput()" style="width:100%; padding:10px; margin-top:4px; border:1px solid #ccc; border-radius:6px; background:#fff;">
-        <option value="梱包資材">📦 梱包資材</option>
-        <option value="ツール代">💻 ツール代</option>
-        <option value="その他">✍️ その他 (手入力)</option>
-      </select>
-      <input type="text" id="expTypeCustom" placeholder="経費の種類を入力" style="display:none; width:100%; padding:10px; margin-top:8px; border:1px solid #e53e3e; border-radius:6px; box-sizing:border-box;">
-      <label style="display:block; margin-top:12px;">金額 (必須)</label>
-      <input type="number" id="expAmount" placeholder="例: 1500" style="width:100%; padding:10px; margin-top:4px; border:1px solid #ccc; border-radius:6px; font-size:18px; font-weight:bold; color:#e53e3e; box-sizing:border-box;">
-      <label style="display:block; margin-top:12px;">メモ (任意)</label>
-      <input type="text" id="expMemo" placeholder="段ボールなど" style="width:100%; padding:8px; margin-top:4px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
-      <div class="modal-actions" style="margin-top:24px; display:flex; gap:8px;">
-        <button style="flex:1; padding:10px; background:#e2e8f0; color:#4a5568; border:none; border-radius:6px; font-weight:bold;" onclick="closeExpenseModal()">キャンセル</button>
-        <button id="expSubmitBtn" style="flex:1; padding:10px; background:#e53e3e; color:white; border:none; border-radius:6px; font-weight:bold;" onclick="submitExpense()">🚀 経費登録</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    const AppStorage = {
-      get: function(key, def) { try { return localStorage.getItem(key) || def; } catch(e) { return def; } },
-      set: function(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+    let viewHistoryStack = ['view-home'];
+    let pendingRegData = {};
+
+    function openConfig() {
+      document.getElementById("cfgKeepa").value = AppStorage.get("sh_keepa", "");
+      document.getElementById("configModal").style.display = "flex";
+    }
+    function closeConfig() { document.getElementById("configModal").style.display = "none"; }
+    function saveConfig() {
+      const key = document.getElementById("cfgKeepa").value.trim();
+      AppStorage.set("sh_keepa", key);
+      closeConfig();
+      checkKeepaToken();
+    }
+
+    window.checkKeepaToken = async function() {
+      const apiKey = AppStorage.get("sh_keepa", "");
+      const valEl = document.getElementById('keepa-token-val');
+      if (!apiKey) { if(valEl) valEl.innerText = "未設定"; return; }
+      if(valEl) valEl.innerText = "...";
+      try {
+        const res = await fetch(`https://api.keepa.com/product?key=${apiKey}&domain=5&asin=B000000000&stats=1`);
+        const json = await res.json();
+        if (json.tokensLeft !== undefined && valEl) valEl.innerText = json.tokensLeft;
+      } catch(e) { if(valEl) valEl.innerText = "エラー"; }
     };
 
-    let currentActiveView = 'view-home';
-    let viewHistoryStack = ['view-home'];
-    let globalInventoryData = [];
-    let globalLedgerData = [];
-    let globalExpenseData = [];
-    let invCurrentPage = 1;
-    let ledgerCurrentPage = 1;
-    const ITEMS_PER_PAGE = 20;
-
-    document.addEventListener("DOMContentLoaded", function() {
-      setupSwipe();
-      fetchDashboardData();
-      hideLoader();
-    });
-
-    function setupSwipe() {
-      // スワイプイベント用リスナー（今回は簡易定義、見た目の破綻防止のため省略記述）
-    }
-
-    function hideLoader() {
-      const loader = document.getElementById("loader");
-      if (loader) {
-        loader.style.opacity = "0";
-        setTimeout(() => { loader.style.display = "none"; }, 500);
-      }
-    }
-
-    function openView(viewId, isBack = false) {
-      if (!isBack && currentActiveView !== viewId) {
-        viewHistoryStack.push(currentActiveView);
-      }
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById(viewId).classList.add('active');
-      currentActiveView = viewId;
-
-      const backBtn = document.getElementById('backBtn');
-      if(viewId === 'view-home') {
-        backBtn.style.display = 'none';
-      } else {
-        backBtn.style.display = 'flex';
-      }
-
-      if (viewId === 'view-price') loadInventoryPrice();
-      if (viewId === 'view-ledger') loadLedgerData();
-    }
-
-    function goBackScreen() {
-      if (viewHistoryStack.length > 0) {
-        openView(viewHistoryStack.pop(), true);
-      } else {
-        openView('view-home');
-      }
-    }
-
-    // =========================================================================
-    // 📊 1. ダッシュボード・売上利益情報の集計（完全脱GAS・Supabaseリアルタイム集計）
-    // =========================================================================
     async function fetchDashboardData() {
       try {
-        // inventoriesから本日分および全体データをセレクトしてフロント側で爆速集計
-        const { data: invData, error } = await supabase
-          .from('inventories')
-          .select('*');
-
+        const { data: invData, error } = await supabase.from('inventories').select('*');
         if (error) throw error;
 
-        let totalInvCount = 0;
-        let totalInvValue = 0;
-        let todayBuyAmount = 0;
-        let todayEstProfit = 0;
-        let todayCount = 0;
-
+        let totalInvCount = 0, totalInvValue = 0, todayBuyAmount = 0, todayEstProfit = 0, todayCount = 0;
         const todayStr = new Date().toISOString().split('T')[0];
 
         invData.forEach(item => {
-          if (item.status === '出品中') {
-            totalInvCount++;
-            totalInvValue += (item.buy_price || 0);
-          }
+          if (item.status === '出品中') { totalInvCount++; totalInvValue += (item.buy_price || 0); }
           if (item.purchase_date === todayStr) {
-            todayCount++;
-            todayBuyAmount += (item.buy_price || 0);
-            const fee = item.referral_fee + item.fba_fee;
-            todayEstProfit += ((item.sell_price || 0) - (item.buy_price || 0) - (item.shipping_cost || 0) - fee);
+            todayCount++; todayBuyAmount += (item.buy_price || 0);
+            todayEstProfit += ((item.sell_price || 0) - (item.buy_price || 0) - (item.shipping_cost || 0) - (item.referral_fee + item.fba_fee));
           }
         });
 
-        // 画面の数値をリアルタイム更新
         const countEl = document.getElementById('realtime-inv-count');
         const valEl = document.getElementById('realtime-inv-value');
-        if(countEl) countEl.innerHTML = `${totalInvCount} <span style="font-size:16px;">個</span>`;
+        if(countEl) countEl.innerText = `${totalInvCount} 個`;
         if(valEl) valEl.innerText = `¥${totalInvValue.toLocaleString()}`;
 
-        // 簡易ダッシュボードHTMLのレンダリング
         const contentArea = document.getElementById('homeGraphContent');
-        if (currentHomeMode === 'turnover' && contentArea) {
+        if (contentArea) {
           contentArea.innerHTML = `
             <div class="turnover-container">
               <div class="turnover-row-1">
+                <div class="keepa-token-panel" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; display:flex; justify-content:space-between; align-items:center; width:100%; box-sizing:border-box; margin-bottom:12px;">
+                  <span style="font-size:12px; font-weight:bold; color:#4a5568;">Keepa残りトークン: <span id="keepa-token-val" style="color:#3182ce; font-weight:900;">--</span></span>
+                  <button onclick="checkKeepaToken()" style="background:#e2e8f0; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold;"><i class="fas fa-sync-alt"></i> 更新</button>
+                </div>
                 <div class="metrics-list" style="width:100%;">
-                  <div><b>🔥 本日のリアルタイム進捗</b></div>
-                  <div class="metric-item"><span>本日仕入れ額</span><span class="metric-value">¥${todayBuyAmount.toLocaleString()}</span></div>
-                  <div class="metric-item"><span>本日仕入れ個数</span><span class="metric-value">${todayCount} 個</span></div>
+                  <div><b>🔥 本日の仕入れ状況</b></div>
+                  <div class="metric-item"><span>仕入れ総額</span><span class="metric-value">¥${todayBuyAmount.toLocaleString()}</span></div>
+                  <div class="metric-item"><span>仕入れ個数</span><span class="metric-value">${todayCount} 個</span></div>
                   <div class="metric-item"><span>想定利益額</span><span class="metric-value profit">¥${todayEstProfit.toLocaleString()}</span></div>
                 </div>
               </div>
             </div>
           `;
         }
-      } catch(e) {
-        console.error("Dashboard集計エラー:", e);
-      }
+        checkKeepaToken();
+      } catch(e) { console.error(e); }
     }
 
-    // =========================================================================
-    // 📥 2. 商品データの追加（仕入れ確定・Supabase直結）
-    // =========================================================================
+    async function runAmazonResearch(fallbackTitle) {
+      const kw = document.getElementById("amazonKw").value.trim(); 
+      const resView = document.getElementById("amazonResult"); 
+      const apiKey = AppStorage.get("sh_keepa", "");
+      if (!kw) return alert("ASINを入力してな！"); 
+      if (!apiKey) { openConfig(); return alert("⚙️設定からKeepaAPIキーを入力してな！"); }
+      
+      resView.innerHTML = '<div class="loading-spinner">⌛ Keepa API解析中...</div>';
+      try {
+        let asin = kw;
+        const prodRes = await fetch(`https://api.keepa.com/product?key=${apiKey}&domain=5&asin=${asin}&stats=90&buybox=1`);
+        const prodJson = await prodRes.json();
+        if (!prodJson.products || prodJson.products.length === 0) { resView.innerHTML = '<div class="card" style="color:red; text-align:center;">❌ 商品が見つかりませんでした</div>'; return; }
+        
+        const p = prodJson.products[0];
+        const productTitle = p.title || fallbackTitle || '不明'; 
+        const modelNum = p.model || '不明';
+        window.tmpTitle = productTitle; window.tmpModel = modelNum;
+        
+        let imgRaw = p.images ? (p.images[0].l || p.images[0].m || p.images[0].s || p.images[0]) : '';
+        let imageUrl = imgRaw ? (String(imgRaw).startsWith('http') ? imgRaw : 'https://images-na.ssl-images-amazon.com/images/I/' + imgRaw) : '';
+        const minUsed = p.stats.current && p.stats.current[2] !== -1 ? p.stats.current[2] : 0;
+        const referralFeePercent = p.referralFeePercentage || 10;
+        const fbaFee = p.fbaFees ? (p.fbaFees.totalFee || 430) : 430;
+        
+        window.tmpFbaFee = fbaFee; window.tmpFeePercent = referralFeePercent;
+
+        resView.innerHTML = `
+          <div class="card" style="display:flex; gap:12px; align-items:flex-start;">
+            <img src="${imageUrl}" style="width:70px; height:70px; object-fit:contain; background:#fff; border:1px solid #eee; padding:2px; border-radius:6px;">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:12px; font-weight:bold; color:#1a365d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(productTitle)}</div>
+              <div style="font-size:11px; color:#666; margin-top:4px;">ASIN: <span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:bold;">${asin}</span></div>
+            </div>
+          </div>
+          <div class="calc-box">
+            <div class="calc-row"><span>仕入れ値</span><input type="number" id="bPrice" placeholder="0"></div>
+            <div class="calc-row"><span>経費/送料</span><input type="number" id="ePrice" placeholder="0"></div>
+            <div class="calc-row"><span>販売価格</span><input type="number" id="sPrice" value="${minUsed}"></div>
+            <div style="border-top:1px solid #555; margin:8px 0; padding-top:8px; font-size:11px; color:#aaa;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>販売手数料 (${referralFeePercent}%)</span><span id="resComm">-</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>FBA手数料</span><span>-¥${fbaFee}</span></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:16px; color:#48bb78; font-weight:bold;"><span>想定利益</span><span id="resProfit">-</span></div>
+          </div>
+          <button class="register-btn" onclick="sendToManager('${asin}')">🚀 Supabaseへ仕入れ登録</button>
+        `;
+        
+        const updateCalc = function() {
+          const sPrice = parseInt(document.getElementById('sPrice').value) || 0;
+          const bPrice = parseInt(document.getElementById('bPrice').value) || 0;
+          const ePrice = parseInt(document.getElementById('ePrice').value) || 0;
+          const comm = Math.floor(sPrice * (referralFeePercent / 100));
+          const profit = sPrice - comm - fbaFee - bPrice - ePrice;
+          document.getElementById('resComm').innerText = '-¥' + comm.toLocaleString();
+          document.getElementById('resProfit').innerText = '¥' + profit.toLocaleString();
+        };
+        ['sPrice', 'bPrice', 'ePrice'].forEach(id => document.getElementById(id).addEventListener('input', updateCalc));
+        updateCalc();
+      } catch(e) { resView.innerHTML = '<div class="card" style="color:red; text-align:center;">解析エラー</div>'; }
+    }
+
+    window.sendToManager = function(asin) {
+      const bPrice = document.getElementById("bPrice").value || 0;
+      const ePrice = document.getElementById("ePrice").value || 0;
+      const sPrice = document.getElementById("sPrice").value || 0;
+      pendingRegData = { asin: asin, buyPrice: bPrice, shipping: ePrice, sellPrice: sPrice, title: window.tmpTitle || "", model: window.tmpModel || "", fbaFee: window.tmpFbaFee || 0, fee: Math.floor(sPrice * ((window.tmpFeePercent || 10) / 100)) };
+      document.getElementById("confirmDetails").innerHTML = `<b>ASIN:</b> ${asin}<br><b>仕入値:</b> ¥${Number(bPrice).toLocaleString()}<br><b>販売値:</b> ¥${Number(sPrice).toLocaleString()}`;
+      document.getElementById("confirmRegisterModal").style.display = "flex";
+      fetchSupplierList();
+    }
+
     window.executeRegistration = async function() {
       const supplier = document.getElementById("supplierSelect").value;
-      if (!supplier) { return alert("仕入れ先を選択してください！"); }
-
+      if (!supplier) return alert("仕入れ先を選択してください！");
       const btn = document.getElementById("executeRegBtn");
       btn.disabled = true; btn.innerHTML = "⌛ 保存中...";
-
       try {
-        const { data, error } = await supabase
-          .from('inventories')
-          .insert([
-            {
-              asin: pendingRegData.asin,
-              jan: document.getElementById('amazonKw') ? document.getElementById('amazonKw').value.trim() : '', 
-              title: pendingRegData.title,
-              model: pendingRegData.model,
-              buy_price: parseInt(pendingRegData.buyPrice) || 0,
-              shipping_cost: parseInt(pendingRegData.shipping) || 0,
-              sell_price: parseInt(pendingRegData.sellPrice) || 0,
-              fba_fee: parseInt(pendingRegData.fbaFee) || 0,
-              referral_fee: parseInt(pendingRegData.fee) || 0,
-              supplier: supplier,
-              purchase_url: document.getElementById("regPurchaseUrl").value.trim(),
-              purchase_id: document.getElementById("regPurchaseId").value.trim(),
-              status: '出品中',
-              user_id: '00000000-0000-0000-0000-000000000000' 
-            }
-          ]);
-
+        const { error } = await supabase.from('inventories').insert([{
+          asin: pendingRegData.asin, title: pendingRegData.title, model: pendingRegData.model,
+          buy_price: parseInt(pendingRegData.buyPrice) || 0, shipping_cost: parseInt(pendingRegData.shipping) || 0,
+          sell_price: parseInt(pendingRegData.sellPrice) || 0, fba_fee: parseInt(pendingRegData.fbaFee) || 0,
+          referral_fee: parseInt(pendingRegData.fee) || 0, supplier: supplier,
+          purchase_url: document.getElementById("regPurchaseUrl").value.trim(), purchase_id: document.getElementById("regPurchaseId").value.trim(),
+          status: '出品中', purchase_date: new Date().toISOString().split('T')[0], user_id: '00000000-0000-0000-0000-000000000000'
+        }]);
         if (error) throw error;
-
         btn.style.background = "#38a169"; btn.innerHTML = "✅ 登録完了！";
-        setTimeout(() => {
-          closeConfirmModal();
-          btn.style.background = "#1a365d"; btn.innerHTML = "この内容で登録"; btn.disabled = false;
-          fetchDashboardData();
-        }, 1500);
-
-      } catch(err) {
-        alert("登録エラー: " + err.message);
-        btn.disabled = false; btn.innerHTML = "🚀 再試行";
-      }
+        setTimeout(() => { closeConfirmModal(); openView('view-home'); fetchDashboardData(); }, 1200);
+      } catch(err) { alert(err.message); btn.disabled = false; btn.innerHTML = "🚀 再試行"; }
     };
 
-    // =========================================================================
-    // ⚙️ 3. 仕入れ先マスターの自動同期
-    // =========================================================================
     async function fetchSupplierList() {
       const select = document.getElementById("supplierSelect");
-      if(!select) return;
-      
       try {
-        const defaultSuppliers = ["メルカリ", "ヤフオク", "ヤフフリ", "店舗", "セカスト", "ブックオフ"];
-        const { data, error } = await supabase.from('inventories').select('supplier');
-        if (error) throw error;
-
-        let combined = [...defaultSuppliers];
-        if (data) {
-          const dbSups = data.map(i => i.supplier).filter(Boolean);
-          combined = [...new Set([...defaultSuppliers, ...dbSups])];
-        }
-
+        const defaultSuppliers = ["メルカリ", "ヤフオク", "ヤフフリ", "店舗", "セカスト"];
         select.innerHTML = '<option value="">選択してください</option>';
-        combined.forEach(sup => { select.innerHTML += `<option value="${sup}">${sup}</option>`; });
-      } catch(e) {
-        select.innerHTML = '<option value="">メルカリ</option><option value="ヤフオク">ヤフオク</option>';
-      }
+        defaultSuppliers.forEach(sup => { select.innerHTML += `<option value="${sup}">${sup}</option>`; });
+      } catch(e) {}
     }
 
-    // =========================================================================
-    // 🔍 4. 在庫データリストの読込（価格改定画面・Supabaseセレクト）
-    // =========================================================================
     async function loadInventoryPrice() {
-      const resDiv = document.getElementById('priceResult');
-      const countEl = document.getElementById('inventoryCount');
-      resDiv.innerHTML = '<tr><td colspan="6" class="loading-spinner">⌛ Supabaseからリアルタイム在庫を抽出中...</td></tr>';
-
+      const tbody = document.getElementById('priceResult');
+      tbody.innerHTML = '<tr><td colspan="6" class="loading-spinner">⌛ 在庫抽出中...</td></tr>';
       try {
-        const { data, error } = await supabase
-          .from('inventories')
-          .select('*')
-          .eq('status', '出品中')
-          .order('created_at', { ascending: false });
-
+        const { data, error } = await supabase.from('inventories').select('*').eq('status', '出品中');
         if (error) throw error;
-
         globalInventoryData = data;
         renderInventoryList();
-      } catch(e) {
-        resDiv.innerHTML = '<tr><td colspan="6" style="color:red; text-align:center;">エラー: ' + e.message + '</td></tr>';
-      }
+      } catch(e) { tbody.innerHTML = '<tr><td colspan="6">取得エラー</td></tr>'; }
     }
 
     function renderInventoryList() {
       const tbody = document.getElementById('priceResult');
       const kw = document.getElementById('price-search-kw').value.toLowerCase().trim();
-      
       let filtered = globalInventoryData;
-      if (kw) {
-        filtered = globalInventoryData.filter(i => (i.title && i.title.toLowerCase().includes(kw)) || (i.asin && i.asin.toLowerCase().includes(kw)));
-      }
-
-      document.getElementById('inventoryCount').innerText = `対象在庫: ${filtered.length}件`;
-
-      if(filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">該当する出品中の在庫はありません</td></tr>';
-        return;
-      }
-
+      if (kw) filtered = globalInventoryData.filter(i => (i.title && i.title.toLowerCase().includes(kw)) || (i.asin && i.asin.toLowerCase().includes(kw)));
+      document.getElementById('inventoryCount').innerText = `出品中在庫: ${filtered.length}件`;
+      
       let html = '';
       filtered.forEach((item, index) => {
         const uniqueId = `inv_${index}`;
-        html += `
-          <tr>
-            <td><div style="width:40px;height:40px;background:#eee;border-radius:4px;"></div></td>
-            <td>
-              <div style="font-weight:bold; color:#1a365d;">${escapeHtml(item.title)}</div>
-              <div style="font-size:10px; color:#718096; margin-top:4px;">ASIN: ${item.asin} | ID: ${item.purchase_id || '-'}</div>
-            </td>
-            <td>
-              <div style="font-weight:bold;">¥${item.sell_price.toLocaleString()}</div>
-              <div style="font-size:10px; color:#a0aec0;">原価: ¥${item.buy_price.toLocaleString()}</div>
-            </td>
-            <td style="text-align:center;">
-              <input type="number" id="sim_price_${uniqueId}" value="${item.sell_price}" oninput="calcSimProfit('${uniqueId}', ${item.buy_price}, ${item.fba_fee}, 10)" style="width:80px; text-align:right; padding:4px; border:1px solid #ccc; border-radius:4px; font-weight:bold;">
-            </td>
-            <td style="text-align:right; font-weight:bold;"><span id="sim_profit_${uniqueId}">-</span></td>
-            <td style="text-align:center;">
-              <button onclick="updateSupabasePrice('${item.id}', '${uniqueId}')" style="background:#07A27B; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold;">価格決定</button>
-            </td>
-          </tr>
-        `;
+        html += `<tr>
+          <td><div style="width:40px;height:40px;background:#eee;border-radius:4px;"></div></td>
+          <td><div style="font-weight:bold;color:#1a365d;">${escapeHtml(item.title)}</div><div style="font-size:10px;color:#999;">ASIN: ${item.asin}</div></td>
+          <td><div style="font-weight:bold;">¥${item.sell_price.toLocaleString()}</div><div style="font-size:10px;color:#aaa;">原価: ¥${item.buy_price.toLocaleString()}</div></td>
+          <td style="text-align:center;"><input type="number" id="sim_price_${uniqueId}" value="${item.sell_price}" oninput="calcSimProfit('${uniqueId}', ${item.buy_price}, ${item.fba_fee}, 10)" style="width:80px; text-align:right; font-weight:bold;"></td>
+          <td style="text-align:right; font-weight:bold;"><span id="sim_profit_${uniqueId}">-</span></td>
+          <td style="text-align:center;"><button onclick="updateSupabasePrice('${item.id}', '${uniqueId}')" style="background:#07A27B; color:white; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:11px;">改定</button></td>
+        </tr>`;
       });
-      tbody.innerHTML = html;
+      tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">在庫なし</td></tr>';
       filtered.forEach((item, index) => calcSimProfit(`inv_${index}`, item.buy_price, item.fba_fee, 10));
     }
 
-    window.calcSimProfit = function(id, cost, fbaFee, feePercent) {
-      const priceInput = document.getElementById('sim_price_' + id);
-      const profitSpan = document.getElementById('sim_profit_' + id);
-      if(!priceInput || !profitSpan) return;
-
-      const price = Number(priceInput.value) || 0;
-      const comm = Math.floor(price * (feePercent / 100));
-      const profit = price - comm - fbaFee - cost;
-      profitSpan.innerText = '¥' + profit.toLocaleString();
-      profitSpan.style.color = profit >= 0 ? '#07A27B' : '#e53e3e';
-    };
-
-    // 価格のインラインアップデート
     window.updateSupabasePrice = async function(dbId, uniqueId) {
       const newPrice = parseInt(document.getElementById('sim_price_' + uniqueId).value) || 0;
       try {
-        const { error } = await supabase
-          .from('inventories')
-          .update({ sell_price: newPrice })
-          .eq('id', dbId);
-
-        if (error) throw error;
-        alert("✅ 価格の改定値をSupabaseへダイレクトに上書き保存しました！");
-        loadInventoryPrice();
-      } catch(e) {
-        alert("エラー: " + e.message);
-      }
+        await supabase.from('inventories').update({ sell_price: newPrice }).eq('id', dbId);
+        alert("✅ 改定価格を保存したで！"); loadInventoryPrice();
+      } catch(e) { alert(e.message); }
     };
 
-    // =========================================================================
-    // 📖 5. 帳簿管理データの読込（販売管理画面）
-    // =========================================================================
     async function loadLedgerData() {
       const tbody = document.getElementById('ledgerResult');
-      tbody.innerHTML = '<tr><td colspan="7" class="loading-spinner">⌛ 帳簿データを読み込み中...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="loading-spinner">⌛ 帳簿抽出中...</td></tr>';
       try {
-        const { data, error } = await supabase
-          .from('inventories')
-          .select('*')
-          .order('purchase_date', { ascending: false });
-
+        const { data, error } = await supabase.from('inventories').select('*');
         if (error) throw error;
         globalLedgerData = data;
         renderLedgerList();
-      } catch(e) {
-        tbody.innerHTML = '<tr><td colspan="7" style="color:red;">エラー</td></tr>';
-      }
+      } catch(e) { tbody.innerHTML = '<tr><td colspan="7">エラー</td></tr>'; }
     }
 
     function renderLedgerList() {
       const tbody = document.getElementById('ledgerResult');
+      const kw = document.getElementById('ledger-search-kw').value.toLowerCase().trim();
+      let filtered = globalLedgerData;
+      if (kw) filtered = globalLedgerData.filter(i => (i.title && i.title.toLowerCase().includes(kw)) || (i.asin && i.asin.toLowerCase().includes(kw)));
+      document.getElementById('ledgerCount').innerText = `表示中: ${filtered.length}件`;
+
       let html = '';
-      globalLedgerData.forEach(item => {
-        html += `
-          <tr>
-            <td style="text-align:center;"><span style="background:#ebf8ff; color:#2b6cb0; padding:4px; border-radius:4px; font-weight:bold; font-size:10px;">${item.status}</span></td>
-            <td><b>${escapeHtml(item.supplier)}</b></td>
-            <td>${item.purchase_date}</td>
-            <td><div style="font-weight:bold;">${escapeHtml(item.title)}</div><div style="font-size:10px; color:#999;">ASIN: ${item.asin}</div></td>
-            <td style="text-align:right;">原価: ¥${item.buy_price.toLocaleString()}<br>売価: ¥${item.sell_price.toLocaleString()}</td>
-            <td style="text-align:right; font-weight:bold; color:#07A27B;">¥${(item.sell_price - item.buy_price - item.fba_fee - item.referral_fee - item.shipping_cost).toLocaleString()}</td>
-            <td style="text-align:center;"><button onclick="deleteLedgerItem('${item.id}')" style="background:#e53e3e; color:white; border:none; padding:4px; border-radius:4px;"><i class="fas fa-trash-alt"></i></button></td>
-          </tr>
-        `;
+      filtered.forEach(item => {
+        html += `<tr>
+          <td style="text-align:center;"><span style="background:#ebf8ff; color:#2b6cb0; padding:4px; border-radius:4px; font-weight:bold; font-size:10px;">${item.status}</span></td>
+          <td><b>${escapeHtml(item.supplier)}</b></td>
+          <td>${item.purchase_date || '-'}</td>
+          <td style="white-space:normal;"><div style="font-weight:bold;color:#1a365d;">${escapeHtml(item.title)}</div><div style="font-size:10px;color:#999;">ASIN: ${item.asin}</div></td>
+          <td style="text-align:right;">原価: ¥${item.buy_price.toLocaleString()}<br>売価: ¥${item.sell_price.toLocaleString()}</td>
+          <td style="text-align:right; font-weight:bold; color:#07A27B;">¥${(item.sell_price - item.buy_price - item.fba_fee - item.referral_fee - item.shipping_cost).toLocaleString()}</td>
+          <td style="text-align:center;"><button onclick="deleteLedgerItem('${item.id}')" style="background:#e53e3e; color:white; border:none; padding:6px; border-radius:4px;"><i class="fas fa-trash-alt"></i></button></td>
+        </tr>`;
       });
       tbody.innerHTML = html || '<tr><td colspan="7">データなし</td></tr>';
     }
 
     window.deleteLedgerItem = async function(id) {
-      if(!confirm("ほんまに削除してええか？")) return;
-      try {
-        const { error } = await supabase.from('inventories').delete().eq('id', id);
-        if (error) throw error;
-        loadLedgerData();
-      } catch(e) { alert(e.message); }
+      if(!confirm("ほんまにこの帳簿データを削除してええか？")) return;
+      try { await supabase.from('inventories').delete().eq('id', id); loadLedgerData(); } catch(e) { alert(e.message); }
     };
 
-    // =========================================================================
-    // 💸 6. 諸経費の追加・一覧取得（経費画面）
-    // =========================================================================
     async function loadExpenseListData() {
       const tbody = document.getElementById('expenseResultBody');
       try {
-        const { data, error } = await supabase.from('expenses').select('*').order('expense_date', { ascending: false });
+        const { data, error } = await supabase.from('expenses').select('*');
         if (error) throw error;
-
         let html = '';
         data.forEach(item => {
-          html += `
-            <tr>
-              <td style="text-align:center;"><button onclick="deleteExpenseItem('${item.id}')" style="background:#e53e3e; color:white; border:none; padding:4px 8px; border-radius:4px;"><i class="fas fa-trash-alt"></i></button></td>
-              <td><b>${item.target_month}</b></td>
-              <td>${item.expense_date}</td>
-              <td><span style="background:#edf2f7; padding:4px; border-radius:4px; font-size:11px; font-weight:bold;">${escapeHtml(item.expense_type)}</span></td>
-              <td style="text-align:right; font-weight:bold; color:#e53e3e;">¥${item.amount.toLocaleString()}</td>
-              <td>${escapeHtml(item.memo || '-')}</td>
-            </tr>
-          `;
+          html += `<tr>
+            <td style="text-align:center;"><button onclick="deleteExpenseItem('${item.id}')" style="background:#e53e3e; color:white; border:none; padding:4px 8px; border-radius:4px;"><i class="fas fa-trash-alt"></i></button></td>
+            <td><b>${item.target_month}</b></td>
+            <td>${item.expense_date}</td>
+            <td><span style="background:#edf2f7; padding:4px; border-radius:6px; font-size:11px; font-weight:bold;">${escapeHtml(item.expense_type)}</span></td>
+            <td style="text-align:right; font-weight:bold; color:#e53e3e;">¥${item.amount.toLocaleString()}</td>
+            <td style="white-space:normal;">${escapeHtml(item.memo || '-')}</td>
+          </tr>`;
         });
         tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">経費データなし</td></tr>';
       } catch(e) { tbody.innerHTML = '<tr><td colspan="6">エラー</td></tr>'; }
@@ -955,50 +593,34 @@
       const month = document.getElementById('expMonth').value.trim();
       const amount = document.getElementById('expAmount').value.trim();
       if (!month || !amount) return alert("月と金額はいれてな！");
-
       const type = document.getElementById('expTypeSelect').value === 'その他' ? document.getElementById('expTypeCustom').value.trim() : document.getElementById('expTypeSelect').value;
-
       try {
-        const { error } = await supabase.from('expenses').insert([{
-          target_month: month,
-          expense_date: document.getElementById('expDate').value.trim() || new Date().toISOString().split('T')[0],
-          expense_type: type,
-          amount: parseInt(amount) || 0,
-          memo: document.getElementById('expMemo').value.trim(),
-          user_id: '00000000-0000-0000-0000-000000000000'
-        }]);
-        if (error) throw error;
-        closeExpenseModal();
-        loadExpenseListData();
+        const { error } = await supabase.from('expenses').insert([{ target_month: month, expense_date: document.getElementById('expDate').value.trim() || new Date().toISOString().split('T')[0], expense_type: type, amount: parseInt(amount) || 0, memo: document.getElementById('expMemo').value.trim(), user_id: '00000000-0000-0000-0000-000000000000' }]);
+        if (error) throw error; closeExpenseModal(); loadExpenseListData();
       } catch(e) { alert(e.message); }
     }
 
     window.deleteExpenseItem = async function(id) {
-      if(!confirm("経費を削除しますか？")) return;
-      try {
-        await supabase.from('expenses').delete().eq('id', id);
-        loadExpenseListData();
-      } catch(e) { alert(e.message); }
+      if(!confirm("経費データを削除しますか？")) return;
+      try { await supabase.from('expenses').delete().eq('id', id); loadExpenseListData(); } catch(e) { alert(e.message); }
     };
 
-    function switchHomeTab(mode, btn) {
-      document.querySelectorAll('.home-tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentHomeMode = mode;
-      fetchDashboardData();
+    function openView(viewId, isBack = false) {
+      if (!isBack && currentActiveView !== viewId) viewHistoryStack.push(currentActiveView);
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+      currentActiveView = viewId;
+      document.getElementById('backBtn').style.display = viewId === 'view-home' ? 'none' : 'flex';
+      if (viewId === 'view-price') loadInventoryPrice();
+      if (viewId === 'view-ledger') loadLedgerData();
     }
-    function toggleExpTypeInput() {
-      const select = document.getElementById('expTypeSelect');
-      document.getElementById('expTypeCustom').style.display = select.value === "その他" ? "block" : "none";
-    }
+
+    function goBackScreen() { if (viewHistoryStack.length > 0) openView(viewHistoryStack.pop(), true); else openView('view-home'); }
+    function closeConfirmModal() { document.getElementById("confirmRegisterModal").style.display = "none"; }
+    function toggleExpTypeInput() { const select = document.getElementById('expTypeSelect'); document.getElementById('expTypeCustom').style.display = select.value === "その他" ? "block" : "none"; }
     function openExpenseModal() { document.getElementById('expenseModal').style.display = "flex"; }
     function closeExpenseModal() { document.getElementById('expenseModal').style.display = "none"; }
-    function openConfig() { document.getElementById('configModal').style.display = "flex"; }
-    function closeConfig() { document.getElementById('configModal').style.display = "none"; }
-    function saveConfig() { closeConfig(); }
-    function openSheetLinksModal() { document.getElementById('sheetLinksModal').style.display = 'flex'; }
-    function closeSheetLinksModal() { document.getElementById('sheetLinksModal').style.display = 'none'; }
-    window.closeConfirmModal = function() { document.getElementById("confirmRegisterModal").style.display = "none"; }
+    function closeConfig() { document.getElementById("configModal").style.display = "none"; }
     function escapeHtml(str) { if(!str) return ""; return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
     window.autoExtractId = function() {}
   </script>
