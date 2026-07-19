@@ -3088,6 +3088,13 @@
         // ==========================================
         // 📤 帳簿データのCSV出力
         // ==========================================
+        // 💡 ステータスに応じて「その月の帳簿」判定に使う日付を切り替える
+        // 納品待ち・出品中 → 仕入日基準／販売済・返金済み・補填済み → 販売日基準
+        function getRelevantDateForItem(item) {
+          const isSold = (item.status === '販売済' || item.status === '返金済み' || item.status === '補填済み');
+          return isSold ? item.sellDate : item.buyDate;
+        }
+
         function openCsvExportModal() {
           if (globalLedgerData.length === 0) {
             alert("⚠️ 先に帳簿データを読み込んでな！（最新を取得ボタンを押してから開いてな）");
@@ -3095,8 +3102,9 @@
           }
           const monthSet = new Set();
           globalLedgerData.forEach(item => {
-            if (item.buyDate) {
-              const m = String(item.buyDate).replace(/-/g, '/').substring(0, 7); // yyyy/MM
+            const d = getRelevantDateForItem(item);
+            if (d) {
+              const m = String(d).replace(/-/g, '/').substring(0, 7); // yyyy/MM
               if (m) monthSet.add(m);
             }
           });
@@ -3105,7 +3113,7 @@
           sel.innerHTML = '<option value="ALL">すべての月</option>';
           monthArr.forEach(m => { sel.innerHTML += `<option value="${m}">${m}</option>`; });
 
-          document.getElementById('csv_exportCount').innerText = `帳簿全体: ${globalLedgerData.length}件`;
+          document.getElementById('csv_exportCount').innerText = `帳簿全体: ${globalLedgerData.length}件（未販売は仕入日、販売済み系は販売日で月判定）`;
           document.getElementById('csvExportModal').style.display = 'flex';
         }
 
@@ -3123,7 +3131,8 @@
           const targetStatus = document.getElementById('csv_exportStatus').value;
 
           let filtered = globalLedgerData.filter(item => {
-            const matchMonth = (targetMonth === 'ALL') || (item.buyDate && String(item.buyDate).replace(/-/g, '/').substring(0, 7) === targetMonth);
+            const relevantDate = getRelevantDateForItem(item);
+            const matchMonth = (targetMonth === 'ALL') || (relevantDate && String(relevantDate).replace(/-/g, '/').substring(0, 7) === targetMonth);
             const matchStatus = (targetStatus === 'ALL') || (item.status === targetStatus);
             return matchMonth && matchStatus;
           });
