@@ -3494,7 +3494,7 @@
           let isRefund = (transType === "返金") || isAdjustmentRefund;
 
           reportData.push({
-            type: "CSV", orderId, isMerchantCSV, isRefund,
+            type: "CSV", orderId, isMerchantCSV, isRefund, sku,
             salesFromCSV: getNum("商品売上") || getNum("商品価格"),
             shippingFromCSV: getNum("配送料"),
             mktShipFee: mktShip,
@@ -3558,10 +3558,17 @@
             if (!u.sale_date) u.sale_date = toIsoDate(rd.date);
             updateCount++; break;
           }
-          else if (rd.type === "CSV" && sheetOrder === rd.orderId && sheetOrder !== "") {
+          else if (rd.type === "CSV") {
+            // 💡 このパスですでに更新予約済みなら、その「今の」注文番号を見る（元の行データではなく）
+            const linkedOrder = updates[row.id] ? String(updates[row.id].order_number || "").trim() : sheetOrder;
+            const isMatch = (linkedOrder === rd.orderId && rd.orderId !== "") ||
+                             (linkedOrder === "" && rd.sku && sheetSku === rd.sku);
+            if (!isMatch) continue;
+
             const m = Number(row.buy_price || 0) + Number(row.shipping_cost || 0);
             const u = getUpdate(row);
             u.sales_channel = 'Amazon';
+            if (!u.order_number) u.order_number = rd.orderId; // 💡 CSVだけでもSKUを頼りに注文番号を紐付ける
 
             if (rd.isRefund) {
               if (u.status_override === '返金済み' || u.status_override === '補填済み') { updateCount++; break; }
