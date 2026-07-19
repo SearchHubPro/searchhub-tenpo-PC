@@ -3412,7 +3412,9 @@
         dropLabel.innerHTML = originalText;
       };
 
-      reader.readAsText(file, 'UTF-8');
+      // 💡 Amazonの注文レポート(TXT)は伝統的にShift_JIS、ペイメントレポート(CSV)はUTF-8で出力される
+      const encoding = file.name.toLowerCase().endsWith('.txt') ? 'Shift_JIS' : 'UTF-8';
+      reader.readAsText(file, encoding);
     }
 
     function toIsoDate(raw) {
