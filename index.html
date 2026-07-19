@@ -3086,9 +3086,228 @@
     }
 
     function processFile(file) {
-      // 🚧 Amazonレポートの自動取込（CSV/TXT解析→帳簿・経費への自動反映）は
-      // Supabase移行の別フェーズで対応予定。誤動作防止のため一旦ここで止める。
-      alert('⚠️ Amazonレポートの自動取込機能は現在準備中です。\n手動で「編集」から登録・修正してな！');
+      const dropLabel = document.getElementById('mini-drop-zone');
+      const originalText = dropLabel.innerHTML;
+      dropLabel.innerHTML = '⌛ 解析中...';
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        let text = e.target.result;
+
+        if (file.name.toLowerCase().endsWith('.csv')) {
+          let tsv = "";
+          let inQuote = false;
+          for (let i = 0; i < text.length; i++) {
+            let c = text[i];
+            if (c === '"') { inQuote = !inQuote; }
+            else if (c === ',' && !inQuote) { tsv += '\t'; }
+            else { tsv += c; }
+          }
+          text = tsv;
+        }
+
+        try {
+          await importAmazonReport(text);
+        } catch(err) {
+          alert('❌ 取込エラーが発生しました: ' + err.message);
+        }
+        dropLabel.innerHTML = originalText;
+      };
+
+      reader.readAsText(file, 'Shift_JIS');
+    }
+
+    function toIsoDate(raw) {
+      if (!raw) return null;
+      const parts = String(raw).trim().split('/');
+      if (parts.length !== 3) return null;
+      const pad2 = n => String(n).padStart(2, '0');
+      return `${parts[0]}-${pad2(parts[1])}-${pad2(parts[2])}`;
+    }
+
+    async function importAmazonReport(text) {
+      const lines = text.split(/\r?\n/);
+      const reportData = [];
+      const expenseData = [];
+      let reportType = "";
+      let txtH = {}; let csvH = {};
+
+      const cleanNum = (val) => {
+        if (val === undefined || val === null) return 0;
+        return Number(String(val).replace(/[,円￥\s"]/g, '')) || 0;
+      };
+
+      for (let l of lines) {
+        l = l.trim(); if (!l) continue;
+        let cols = l.split("\t").map(c => c.trim().replace(/^"|"$/g, ''));
+
+        if (cols.includes("amazon-order-id")) { reportType = "TXT"; cols.forEach((h, idx) => { txtH[h] = idx; }); continue; }
+        if (cols.includes("トランザクションの種類") && cols.includes("SKU")) { reportType = "CSV"; cols.forEach((h, idx) => { csvH[h] = idx; }); continue; }
+
+        if (reportType === "TXT" && Object.keys(txtH).length > 0) {
+          let status = cols[txtH["order-status"]] || "";
+          if (status.indexOf("Shipped") === -1) continue;
+          let channel = cols[txtH["fulfillment-channel"]] || "";
+          let isMerchant = (channel === "Merchant");
+          reportData.push({
+            type: "TXT", isMerchant, sku: cols[txtH["sku"]], orderId: cols[txtH["amazon-order-id"]],
+            date: String(cols[txtH["purchase-date"]] || "").split("T")[0].replace(/-/g, "/"),
+            sales: cleanNum(cols[txtH["item-price"]]), shipping: cleanNum(cols[txtH["shipping-price"]])
+          });
+        }
+
+        if (reportType === "CSV" && Object.keys(csvH).length > 0) {
+          let orderId = cols[csvH["注文番号"]] || "";
+          let transType = cols[csvH["トランザクションの種類"]] || "";
+          let description = cols[csvH["説明"]] || "";
+          let getNum = (k) => cleanNum(cols[csvH[k]]);
+
+          if (!orderId) {
+            const targetExpTypes = ["FBA 在庫関連の手数料", "注文外料金", "サービス料金"];
+            if (targetExpTypes.includes(transType)) {
+              let amount = getNum("合計");
+              if (amount !== 0) {
+                let dateStr = cols[csvH["日付/時間"]] || "";
+                let dayStr = dateStr.split(" ")[0] || "";
+                let monthParts = dayStr.split("/");
+                let monthStr = monthParts.length >= 2 ? `${monthParts[0]}/${monthParts[1]}` : "";
+                expenseData.push({ month: monthStr, date: dayStr, type: transType, amount: Math.abs(amount), memo: description });
+              }
+            }
+            continue;
+          }
+
+          let fulfillment = cols[csvH["フルフィルメント"]] || "";
+          let mktShip = 0;
+          if (transType === "配送サービス" && description.includes("Amazon 経由で購入した配送ラベル")) {
+            mktShip = getNum("その他");
+          }
+          let isMerchantCSV = (fulfillment === "出品者" || mktShip < 0);
+          let isRefund = (transType === "返金");
+
+          reportData.push({
+            type: "CSV", orderId, isMerchantCSV, isRefund,
+            salesFromCSV: getNum("商品売上") || getNum("商品価格"),
+            shippingFromCSV: getNum("配送料"),
+            mktShipFee: mktShip,
+            refFee: getNum("販売手数料") + getNum("手数料"),
+            fbaFeeCSV: getNum("FBA 手数料"),
+            pointFeeCSV: getNum("Amazonポイントの費用"),
+            promoFeeCSV: getNum("プロモーション割引額"),
+            hotenCSV: getNum("その他")
+          });
+        }
+      }
+
+      if (reportData.length === 0 && expenseData.length === 0) {
+        alert("⚠️ このファイルから取り込めるデータが見つかりませんでした。\nAmazonの注文レポート(TXT)またはペイメントレポート(CSV)か確認してな！");
+        return;
+      }
+
+      const { data: rows, error } = await sb.from('inventories').select('id, sku, order_number, buy_price, shipping_cost, sale_date, actual_sales, actual_shipping, actual_fee, profit, status_override');
+      if (error) throw error;
+
+      const updates = {};
+      const getUpdate = (row) => {
+        if (!updates[row.id]) {
+          updates[row.id] = {
+            sale_date: row.sale_date, order_number: row.order_number,
+            actual_sales: row.actual_sales || 0, actual_shipping: row.actual_shipping || 0,
+            actual_fee: row.actual_fee || 0, profit: row.profit || 0, status_override: row.status_override
+          };
+        }
+        return updates[row.id];
+      };
+
+      reportData.sort((a, b) => (a.isRefund === b.isRefund ? 0 : a.isRefund ? 1 : -1));
+
+      let updateCount = 0;
+      reportData.forEach(rd => {
+        for (const row of rows) {
+          const sheetSku = String(row.sku || "").trim();
+          const sheetOrder = String(row.order_number || "").trim();
+
+          if (rd.type === "TXT" && sheetSku === rd.sku && (sheetOrder === "" || sheetOrder === rd.orderId)) {
+            const u = getUpdate(row);
+            u.sale_date = toIsoDate(rd.date);
+            u.order_number = rd.orderId;
+            u.actual_sales = rd.sales;
+            u.actual_shipping = rd.isMerchant ? 0 : rd.shipping;
+            updateCount++; break;
+          }
+          else if (rd.type === "CSV" && sheetOrder === rd.orderId && sheetOrder !== "") {
+            const m = Number(row.buy_price || 0) + Number(row.shipping_cost || 0);
+            const u = getUpdate(row);
+
+            if (rd.isRefund) {
+              if (u.status_override === '返金済み' || u.status_override === '補填済み') { updateCount++; break; }
+
+              const currentSalesForCheck = Number(u.actual_sales) || 0;
+              if (currentSalesForCheck !== 0) {
+                u.actual_sales = 0; u.actual_shipping = 0;
+                const currentFee = Number(u.actual_fee) || 0;
+                u.actual_fee = currentFee + rd.refFee + rd.fbaFeeCSV + rd.pointFeeCSV + rd.promoFeeCSV + rd.hotenCSV;
+                u.profit = u.actual_fee;
+              }
+              if (rd.hotenCSV > 0 && rd.salesFromCSV === 0) {
+                u.actual_sales = rd.hotenCSV; u.profit = rd.hotenCSV - m;
+                u.status_override = '補填済み';
+              } else {
+                u.status_override = '返金済み';
+              }
+            } else {
+              if (rd.isMerchantCSV) {
+                if (rd.mktShipFee < 0) u.actual_shipping = rd.mktShipFee;
+                let merchFeeCalc = rd.refFee + rd.pointFeeCSV + rd.promoFeeCSV;
+                if (merchFeeCalc !== 0) u.actual_fee = merchFeeCalc;
+              } else {
+                let feeCalc = rd.refFee + rd.fbaFeeCSV + rd.pointFeeCSV + rd.promoFeeCSV;
+                if (feeCalc !== 0) u.actual_fee = feeCalc;
+              }
+              const currentSales = Number(u.actual_sales) || 0;
+              if (currentSales === 0 && rd.salesFromCSV !== 0) u.actual_sales = rd.salesFromCSV;
+
+              const r = Number(u.actual_sales) || 0;
+              const t = Number(u.actual_fee) || 0;
+              const s = Number(u.actual_shipping) || 0;
+              u.profit = (r > 0) ? (r + t + s - m) : (r + t + s);
+            }
+            updateCount++; break;
+          }
+        }
+      });
+
+      const ids = Object.keys(updates);
+      for (const id of ids) {
+        await sb.from('inventories').update(updates[id]).eq('id', id);
+      }
+
+      let expCount = 0;
+      if (expenseData.length > 0) {
+        const { data: existing } = await sb.from('expenses').select('expense_date, expense_type, amount');
+        const existingKeys = new Set((existing || []).map(ex => `${ex.expense_date}_${ex.expense_type}_${ex.amount}`));
+        const newExpenses = [];
+        expenseData.forEach(ex => {
+          const isoDate = toIsoDate(ex.date);
+          const key = `${isoDate}_${ex.type}_${ex.amount}`;
+          if (!existingKeys.has(key)) {
+            newExpenses.push({
+              user_id: currentUser.id, target_month: ex.month, expense_date: isoDate,
+              expense_type: ex.type, amount: ex.amount, memo: ex.memo, source: '🤖 Amazon自動'
+            });
+            existingKeys.add(key);
+          }
+        });
+        if (newExpenses.length > 0) {
+          const { error: expErr } = await sb.from('expenses').insert(newExpenses);
+          if (!expErr) expCount = newExpenses.length;
+        }
+      }
+
+      alert(`【取込完了】\n注文を${updateCount}件更新し、\n新規の経費を${expCount}件追加しました！`);
+
+      if (typeof loadLedgerData === 'function' && currentActiveView === 'view-ledger') loadLedgerData();
+      if (typeof loadExpenseListData === 'function' && currentActiveView === 'view-expense') loadExpenseListData();
     }
 
     function handleDragOverMini(e) {
