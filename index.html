@@ -554,6 +554,9 @@
         </div>
 
         <div style="display:flex; gap:8px; align-items:center;">
+          <button onclick="openFleaRegisterModal()" style="background:#d69e2e; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:11px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+            <i class="fas fa-store"></i> フリマ登録
+          </button>
           <button onclick="loadLedgerData()" style="background:#1a365d; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:11px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
             <i class="fas fa-sync-alt"></i> 最新を取得
           </button>
@@ -1008,6 +1011,12 @@
       
       <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">商品名</label>
       <input type="text" id="edit_title" style="width:100%; padding:8px; box-sizing:border-box; background:#f8fafc;">
+
+      <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">写真URL（後から追加・変更OK）</label>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" id="edit_imageUrl" placeholder="https://..." oninput="updateEditImagePreview()" style="flex:1; padding:8px; box-sizing:border-box;">
+        <img id="edit_imagePreview" src="" style="width:36px; height:36px; object-fit:contain; border:1px solid #eee; border-radius:6px; background:#f8fafc; display:none;">
+      </div>
       
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
         <div><label style="font-size:11px; font-weight:bold;">型番</label><input type="text" id="edit_model" style="width:100%; padding:8px; box-sizing:border-box;"></div>
@@ -1029,9 +1038,26 @@
       
       <div style="background:#f8fafc; padding:10px; border-radius:8px; margin-top:12px; border:1px solid #e2e8f0;">
         <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
-          <div><label style="font-size:11px; font-weight:bold; color:#718096;">仕入値</label><input type="number" id="edit_buyPrice" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;"></div>
-          <div><label style="font-size:11px; font-weight:bold; color:#718096;">送料/経費</label><input type="number" id="edit_expense" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;"></div>
+          <div><label style="font-size:11px; font-weight:bold; color:#718096;">仕入値</label><input type="number" id="edit_buyPrice" oninput="calcEditProfit()" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;"></div>
+          <div><label style="font-size:11px; font-weight:bold; color:#718096;">送料/経費</label><input type="number" id="edit_expense" oninput="calcEditProfit()" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;"></div>
           <div><label style="font-size:11px; font-weight:bold; color:#3182ce;">販売予定</label><input type="number" id="edit_estPrice" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;"></div>
+        </div>
+      </div>
+
+      <div style="background:#fff5f5; padding:10px; border-radius:8px; margin-top:12px; border:1px solid #feb2b2;">
+        <div style="font-size:12px; font-weight:bold; color:#c53030; margin-bottom:8px;"><i class="fas fa-receipt"></i> 販売情報（古物台帳用・売却時に入力）</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <div><label style="font-size:11px; font-weight:bold; color:#718096;">販売日</label><input type="date" id="edit_saleDate" oninput="calcEditProfit()" style="width:100%; padding:8px; box-sizing:border-box;"></div>
+          <div><label style="font-size:11px; font-weight:bold; color:#718096;">注文番号</label><input type="text" id="edit_orderNum" style="width:100%; padding:8px; box-sizing:border-box;"></div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:8px;">
+          <div><label style="font-size:11px; font-weight:bold; color:#718096;">売上額</label><input type="number" id="edit_actualSales" oninput="calcEditProfit()" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;"></div>
+          <div><label style="font-size:11px; font-weight:bold; color:#718096;">配送料</label><input type="number" id="edit_actualShipping" oninput="calcEditProfit()" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;"></div>
+          <div><label style="font-size:11px; font-weight:bold; color:#718096;">手数料</label><input type="number" id="edit_actualFee" oninput="calcEditProfit()" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px dashed #feb2b2;">
+          <span style="font-size:12px; font-weight:bold; color:#718096;">利益（自動計算）</span>
+          <span id="edit_profitDisplay" style="font-size:18px; font-weight:900; color:#07A27B;">¥0</span>
         </div>
       </div>
 
@@ -1048,7 +1074,51 @@
 </div>
       
       
-  </div> </div><div id="confirmRegisterModal" class="modal">
+  </div> </div>
+
+  <div id="fleaRegisterModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <h3 style="margin-top:0; border-bottom:2px solid #e2e8f0; padding-bottom:8px;"><i class="fas fa-store"></i> フリマ商品の手動登録</h3>
+      <div style="font-size:11px; color:#718096; margin-bottom:12px;">Amazonにカタログが無い商品を、手入力で登録します。</div>
+
+      <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">商品名<span style="color:#e53e3e;">*</span></label>
+      <input type="text" id="flea_title" style="width:100%; padding:8px; box-sizing:border-box;">
+
+      <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">写真URL（任意・後から追加もOK）</label>
+      <input type="text" id="flea_imageUrl" placeholder="https://..." style="width:100%; padding:8px; box-sizing:border-box;">
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+        <div>
+          <label style="font-size:11px; font-weight:bold;">仕入れ日</label>
+          <input type="date" id="flea_purchaseDate" style="width:100%; padding:8px; box-sizing:border-box;">
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:bold;">仕入先<span style="color:#e53e3e;">*</span></label>
+          <select id="flea_supplier" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:6px; outline:none;">
+            <option value="">読込中...</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+        <div>
+          <label style="font-size:11px; font-weight:bold;">仕入値<span style="color:#e53e3e;">*</span></label>
+          <input type="number" id="flea_buyPrice" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;">
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:bold;">販売予定価格<span style="color:#e53e3e;">*</span></label>
+          <input type="number" id="flea_sellPrice" style="width:100%; padding:8px; box-sizing:border-box; text-align:right;">
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:20px;">
+        <button style="background:#e2e8f0; color:#4a5568;" onclick="document.getElementById('fleaRegisterModal').style.display='none'">キャンセル</button>
+        <button id="fleaRegisterBtn" style="background:#1a365d; color:white;" onclick="submitFleaRegister()">この内容で登録</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmRegisterModal" class="modal">
     <div class="modal-content">
       <h3>🚀 仕入れ登録の最終確認</h3>
       <div id="confirmDetails" style="font-size:13px; color:#4a5568; margin-bottom:12px; line-height:1.6; background:#f8fafc; padding:10px; border-radius:6px; border:1px solid #e2e8f0;">
@@ -2274,6 +2344,80 @@
           }
         };
 
+        // ==========================================
+        // 🏪 フリマ商品の手動登録（ASINカタログが無い商品用）
+        // ==========================================
+        async function openFleaRegisterModal() {
+          document.getElementById('fleaRegisterModal').style.display = 'flex';
+          document.getElementById('flea_title').value = '';
+          document.getElementById('flea_imageUrl').value = '';
+          document.getElementById('flea_buyPrice').value = '';
+          document.getElementById('flea_sellPrice').value = '';
+
+          const now = new Date();
+          document.getElementById('flea_purchaseDate').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+          if (typeof window.globalSupplierData === 'undefined' || window.globalSupplierData.length === 0) {
+            try {
+              const { data } = await sb.from('profiles').select('settings').eq('id', currentUser.id).maybeSingle();
+              if (data && data.settings && data.settings.suppliers) window.globalSupplierData = data.settings.suppliers;
+            } catch(e) {}
+          }
+          const supSelect = document.getElementById('flea_supplier');
+          supSelect.innerHTML = '<option value="">選択してください</option>';
+          (window.globalSupplierData || []).forEach(s => { supSelect.innerHTML += `<option value="${s}">${s}</option>`; });
+        }
+
+        async function submitFleaRegister() {
+          const title = document.getElementById('flea_title').value.trim();
+          const imageUrl = document.getElementById('flea_imageUrl').value.trim();
+          const purchaseDate = document.getElementById('flea_purchaseDate').value;
+          const supplier = document.getElementById('flea_supplier').value;
+          const buyPrice = Number(document.getElementById('flea_buyPrice').value);
+          const sellPrice = Number(document.getElementById('flea_sellPrice').value);
+
+          if (!title) return alert("⚠️ 商品名を入力してな！");
+          if (!supplier) return alert("⚠️ 仕入先を選択してな！");
+          if (!buyPrice) return alert("⚠️ 仕入値を入力してな！");
+          if (!sellPrice) return alert("⚠️ 販売予定価格を入力してな！");
+
+          const btn = document.getElementById('fleaRegisterBtn');
+          const originalText = btn.innerText;
+          btn.innerText = "⌛ 登録中..."; btn.disabled = true;
+
+          try {
+            const { data: maxRows } = await sb.from('inventories').select('no').not('no', 'is', null).order('no', { ascending: false }).limit(1);
+            const nextNo = (maxRows && maxRows.length > 0 && maxRows[0].no) ? maxRows[0].no + 1 : 1;
+            const dateForSku = purchaseDate.replace(/-/g, '');
+            const sku = `${nextNo}-${dateForSku}-FLEA`;
+
+            const { error } = await sb.from('inventories').insert({
+              no: nextNo,
+              purchase_date: purchaseDate || null,
+              supplier: supplier,
+              asin: null,
+              title: title,
+              image_url: imageUrl || null,
+              sku: sku,
+              buy_price: buyPrice,
+              sell_price: sellPrice,
+              is_listed: false,
+              user_id: currentUser.id
+            });
+            if (error) throw error;
+
+            btn.style.background = "#38a169"; btn.innerText = "✅ 登録完了！";
+            setTimeout(() => {
+              document.getElementById('fleaRegisterModal').style.display = 'none';
+              btn.style.background = "#1a365d"; btn.innerText = originalText; btn.disabled = false;
+              loadLedgerData();
+            }, 1200);
+          } catch(err) {
+            alert("❌ 登録失敗: " + err.message);
+            btn.innerText = originalText; btn.disabled = false;
+          }
+        }
+
         window.executeRegistration = async function() {
           const supplier = document.getElementById("supplierSelect").value;
           if (!supplier) { return alert("仕入れ先を選択してください！"); }
@@ -3477,6 +3621,8 @@
       document.getElementById('edit_buyDate').value = item.buyDate || '';
       document.getElementById('edit_supplier').value = item.supplier || '';
       document.getElementById('edit_title').value = item.title || '';
+      document.getElementById('edit_imageUrl').value = item.imageUrl || '';
+      updateEditImagePreview();
       document.getElementById('edit_model').value = item.model || '';
       document.getElementById('edit_sku').value = item.sku || '';
       document.getElementById('edit_condition').value = item.condition || '';
@@ -3485,6 +3631,32 @@
       document.getElementById('edit_buyPrice').value = item.buyPrice || 0;
       document.getElementById('edit_expense').value = item.expense || 0;
       document.getElementById('edit_estPrice').value = item.estPrice || 0;
+      document.getElementById('edit_saleDate').value = item.sellDate || '';
+      document.getElementById('edit_orderNum').value = item.orderNum || '';
+      document.getElementById('edit_actualSales').value = item.sales || 0;
+      document.getElementById('edit_actualShipping').value = item.shipping || 0;
+      document.getElementById('edit_actualFee').value = item.fee || 0;
+      calcEditProfit();
+    }
+
+    function updateEditImagePreview() {
+      const url = document.getElementById('edit_imageUrl').value.trim();
+      const img = document.getElementById('edit_imagePreview');
+      if (url) { img.src = url; img.style.display = 'block'; } else { img.style.display = 'none'; }
+    }
+
+    function calcEditProfit() {
+      const buyPrice = Number(document.getElementById('edit_buyPrice').value) || 0;
+      const expense = Number(document.getElementById('edit_expense').value) || 0;
+      const sales = Number(document.getElementById('edit_actualSales').value) || 0;
+      const shipping = Number(document.getElementById('edit_actualShipping').value) || 0;
+      const fee = Number(document.getElementById('edit_actualFee').value) || 0;
+      const cost = buyPrice + expense;
+      const profit = sales > 0 ? (sales + shipping + fee - cost) : (sales + shipping + fee);
+      const el = document.getElementById('edit_profitDisplay');
+      el.innerText = `¥${profit.toLocaleString()}`;
+      el.style.color = profit >= 0 ? '#07A27B' : '#e53e3e';
+      return profit;
     }
 
     async function deleteLedgerItem() {
@@ -3524,12 +3696,19 @@
         title: document.getElementById('edit_title').value,
         model: document.getElementById('edit_model').value,
         sku: document.getElementById('edit_sku').value,
+        image_url: document.getElementById('edit_imageUrl').value.trim() || null,
         condition: document.getElementById('edit_condition').value,
         purchase_id: document.getElementById('edit_itemId').value,
         description: document.getElementById('edit_description').value,
         buy_price: Number(document.getElementById('edit_buyPrice').value) || 0,
         shipping_cost: Number(document.getElementById('edit_expense').value) || 0,
-        sell_price: Number(document.getElementById('edit_estPrice').value) || 0
+        sell_price: Number(document.getElementById('edit_estPrice').value) || 0,
+        sale_date: document.getElementById('edit_saleDate').value || null,
+        order_number: document.getElementById('edit_orderNum').value || null,
+        actual_sales: Number(document.getElementById('edit_actualSales').value) || 0,
+        actual_shipping: Number(document.getElementById('edit_actualShipping').value) || 0,
+        actual_fee: Number(document.getElementById('edit_actualFee').value) || 0,
+        profit: calcEditProfit()
       };
       
       try {
