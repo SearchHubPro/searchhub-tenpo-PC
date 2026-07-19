@@ -3634,8 +3634,8 @@
       document.getElementById('edit_saleDate').value = item.sellDate || '';
       document.getElementById('edit_orderNum').value = item.orderNum || '';
       document.getElementById('edit_actualSales').value = item.sales || 0;
-      document.getElementById('edit_actualShipping').value = item.shipping || 0;
-      document.getElementById('edit_actualFee').value = item.fee || 0;
+      document.getElementById('edit_actualShipping').value = Math.abs(item.shipping || 0);
+      document.getElementById('edit_actualFee').value = Math.abs(item.fee || 0);
       calcEditProfit();
     }
 
@@ -3652,7 +3652,8 @@
       const shipping = Number(document.getElementById('edit_actualShipping').value) || 0;
       const fee = Number(document.getElementById('edit_actualFee').value) || 0;
       const cost = buyPrice + expense;
-      const profit = sales > 0 ? (sales + shipping + fee - cost) : (sales + shipping + fee);
+      // 💡 手入力欄は「配送料・手数料はプラスの数字で入れる」前提。ここで引き算する。
+      const profit = sales - shipping - fee - cost;
       const el = document.getElementById('edit_profitDisplay');
       el.innerText = `¥${profit.toLocaleString()}`;
       el.style.color = profit >= 0 ? '#07A27B' : '#e53e3e';
@@ -3706,8 +3707,8 @@
         sale_date: document.getElementById('edit_saleDate').value || null,
         order_number: document.getElementById('edit_orderNum').value || null,
         actual_sales: Number(document.getElementById('edit_actualSales').value) || 0,
-        actual_shipping: Number(document.getElementById('edit_actualShipping').value) || 0,
-        actual_fee: Number(document.getElementById('edit_actualFee').value) || 0,
+        actual_shipping: -Math.abs(Number(document.getElementById('edit_actualShipping').value) || 0),
+        actual_fee: -Math.abs(Number(document.getElementById('edit_actualFee').value) || 0),
         profit: calcEditProfit()
       };
       
