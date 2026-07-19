@@ -601,6 +601,7 @@
         <table id="ledgerTable" style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; text-align: left; white-space: nowrap; min-width: 950px;">
           <thead>
             <tr>
+              <th style="width: 50px; text-align:center;">写真</th>
               <th style="width: 60px; text-align:center;">出品</th>
               <th style="width: 140px;">仕入先・URL・ID</th>
               <th style="width: 90px;">仕入日 / No</th>
@@ -621,7 +622,7 @@
             </tr>
           </thead>
           <tbody id="ledgerResult">
-            <tr><td colspan="8" class="loading-spinner" style="padding:20px; text-align:center;">⌛ Managerシートから帳簿データを同期中...</td></tr>
+            <tr><td colspan="9" class="loading-spinner" style="padding:20px; text-align:center;">⌛ Managerシートから帳簿データを同期中...</td></tr>
           </tbody>
         </table>
       </div>
@@ -823,6 +824,7 @@
         <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; text-align: left; white-space: nowrap; min-width: 800px;">
           <thead>
             <tr style="background: #edf2f7; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 0 0 #cbd5e0;">
+              <th style="padding: 10px 12px; width: 50px; text-align:center;">写真</th>
               <th style="padding: 10px 12px; width: 60px; text-align:center;">日付</th>
               <th style="padding: 10px 12px; width: 100px;">ASIN</th>
               <th style="padding: 10px 12px;">商品名</th>
@@ -856,6 +858,7 @@
         <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; text-align: left; white-space: nowrap; min-width: 900px;">
           <thead>
             <tr style="background: #edf2f7; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 0 0 #cbd5e0;">
+              <th style="padding: 10px 12px; width: 50px; text-align:center;">写真</th>
               <th style="padding: 10px 12px; width: 60px; text-align:center;">日付</th>
               <th style="padding: 10px 12px; width: 100px;">ASIN</th>
               <th style="padding: 10px 12px;">商品名 / 注文番号</th>
@@ -2005,6 +2008,7 @@
               const firstImg = p.images[0]; imgRaw = (typeof firstImg === 'object') ? (firstImg.l || firstImg.m || firstImg.s) : firstImg;
             } else if (p.imagesCSV) imgRaw = p.imagesCSV.split(',')[0];
             let imageUrl = imgRaw ? (imgRaw.startsWith('http') ? imgRaw : 'https://images-na.ssl-images-amazon.com/images/I/' + imgRaw) : '';
+            window.tmpImageUrl = imageUrl;
             const avgUsed = p.stats.avg90 && p.stats.avg90[2] !== -1 ? p.stats.avg90[2] : 0;
             const minUsed = p.stats.current && p.stats.current[2] !== -1 ? p.stats.current[2] : 0;
             
@@ -2200,7 +2204,8 @@
             title: window.tmpTitle || "",
             model: window.tmpModel || "",
             fbaFee: window.tmpFbaFee || 0,
-            fee: Math.floor(sPrice * ((window.tmpFeePercent || 10) / 100))
+            fee: Math.floor(sPrice * ((window.tmpFeePercent || 10) / 100)),
+            imageUrl: window.tmpImageUrl || ""
           };
 
           document.getElementById("confirmDetails").innerHTML = 
@@ -2300,6 +2305,7 @@
               title: pendingRegData.title || "",
               model: pendingRegData.model || "",
               sku: sku,
+              image_url: pendingRegData.imageUrl || "",
               buy_price: Number(pendingRegData.buyPrice) || 0,
               shipping_cost: Number(pendingRegData.shipping) || 0,
               sell_price: Number(pendingRegData.sellPrice) || 0,
@@ -2586,7 +2592,7 @@
 
           try {
             const [invRes, expRes] = await Promise.all([
-              sb.from('inventories').select('asin, title, purchase_date, sale_date, order_number, buy_price, shipping_cost, sell_price, actual_sales, actual_shipping, actual_fee, fba_fee, referral_fee'),
+              sb.from('inventories').select('asin, title, image_url, purchase_date, sale_date, order_number, buy_price, shipping_cost, sell_price, actual_sales, actual_shipping, actual_fee, fba_fee, referral_fee'),
               sb.from('expenses').select('target_month, amount')
             ]);
             if (invRes.error) throw invRes.error;
@@ -2612,7 +2618,7 @@
                 purchaseSummary[pKey].profit += profit;
                 purchaseSummary[pKey].count += 1;
                 purchaseSummary[pKey].dates.add(row.purchase_date);
-                purchaseSummary[pKey].items.push({ date: `${m}/${d}`, asin, title, cost, sales, profit });
+                purchaseSummary[pKey].items.push({ date: `${m}/${d}`, asin, title, img: row.image_url, cost, sales, profit });
               }
 
               if (row.sale_date && row.order_number) {
@@ -2630,7 +2636,7 @@
                 salesSummary[sKey].cost += s_cost;
                 salesSummary[sKey].profit += s_profit;
                 salesSummary[sKey].count += 1;
-                salesSummary[sKey].items.push({ date: `${sm}/${sd}`, asin, title, orderNum: row.order_number, cost: s_cost, sales: s_sales, profit: s_profit });
+                salesSummary[sKey].items.push({ date: `${sm}/${sd}`, asin, title, img: row.image_url, orderNum: row.order_number, cost: s_cost, sales: s_sales, profit: s_profit });
               }
             });
 
@@ -2786,7 +2792,7 @@
           const start = (monthlyCurrentPage - 1) * ITEMS_PER_PAGE; const pageItems = filtered.slice(start, start + ITEMS_PER_PAGE);
           
           if (pageItems.length === 0) { 
-            listDiv.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#a0aec0; font-weight:bold;">見つかりませんでした。</td></tr>`; 
+            listDiv.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#a0aec0; font-weight:bold;">見つかりませんでした。</td></tr>`; 
             pagiDiv.style.display = 'none'; 
             return; 
           }
@@ -2800,10 +2806,14 @@
             
             const borderLeftColor = isPurchase ? '#3182ce' : '#e53e3e';
             const profitColor = item.profit >= 0 ? '#07A27B' : '#e53e3e';
+            const thumbHtml = item.img
+              ? `<div style="width:36px; height:36px; background:#fff; border:1px solid #eee; border-radius:6px; padding:2px; margin:0 auto;"><img src="${item.img}" style="width:100%; height:100%; object-fit:contain;"></div>`
+              : `<div style="width:36px; height:36px; background:#f8fafc; border:1px solid #eee; border-radius:6px; margin:0 auto;"></div>`;
             
             html += `
             <tr style="background:#fff; border-bottom:1px solid #f1f5f9;">
-              <td style="padding:10px 12px; text-align:center; border-left:4px solid ${borderLeftColor}; font-weight:bold; color:#4a5568;">${item.date}</td>
+              <td style="padding:10px 12px; text-align:center; border-left:4px solid ${borderLeftColor};">${thumbHtml}</td>
+              <td style="padding:10px 12px; text-align:center; font-weight:bold; color:#4a5568;">${item.date}</td>
               <td style="padding:10px 12px; font-family:monospace; font-weight:bold; color:#0369a1;">${escapeHtml(item.asin)}</td>
               <td style="padding:10px 12px; white-space:normal; font-weight:bold; color:#2d3748; line-height:1.4;">${nameAndOrder}</td>
               <td style="padding:10px 12px; text-align:right; font-weight:bold; color:#4a5568;">¥${Number(item.cost).toLocaleString()}</td>
@@ -2872,6 +2882,7 @@
             asin: row.asin,
             title: row.title,
             model: row.model,
+            imageUrl: row.image_url,
             sku: row.sku,
             condition: row.condition,
             description: row.description,
@@ -2895,7 +2906,7 @@
           const resDiv = document.getElementById('ledgerResult');
           const countEl = document.getElementById('ledgerCount');
 
-          resDiv.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#718096;">⌛ 帳簿データを同期中...</td></tr>';
+          resDiv.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:#718096;">⌛ 帳簿データを同期中...</td></tr>';
           countEl.innerText = "同期中...";
 
           try {
@@ -2903,7 +2914,7 @@
             if (error) throw error;
 
             if (!data || data.length === 0) {
-              resDiv.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#a0aec0; padding:30px 10px;">現在、帳簿にデータがありません。</td></tr>';
+              resDiv.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#a0aec0; padding:30px 10px;">現在、帳簿にデータがありません。</td></tr>';
               countEl.innerText = "帳簿: 0件";
               globalLedgerData = [];
               document.getElementById('ledger-pagination').style.display = 'none';
@@ -2915,7 +2926,7 @@
             renderLedgerList();
 
           } catch (err) {
-            resDiv.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#e53e3e; font-weight:bold;">❌ 通信エラーが発生しました</td></tr>';
+            resDiv.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#e53e3e; font-weight:bold;">❌ 通信エラーが発生しました</td></tr>';
             countEl.innerText = "通信失敗";
           }
         }
@@ -2952,7 +2963,7 @@
       const pageItems = filtered.slice(start, start + ITEMS_PER_PAGE);
 
       if (pageItems.length === 0) {
-        resDiv.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#4a5568; font-weight:bold; padding:20px;">条件に合う商品が見つかりません。</td></tr>';
+        resDiv.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#4a5568; font-weight:bold; padding:20px;">条件に合う商品が見つかりません。</td></tr>';
         document.getElementById('ledger-pagination').style.display = 'none';
         return;
       }
@@ -2982,6 +2993,10 @@
         }
 
         let urlIcon = item.url ? `<a href="${item.url}" target="_blank" style="color:#3182ce; margin-left:4px;"><i class="fas fa-external-link-alt"></i></a>` : '';
+
+        let thumbHtml = item.imageUrl
+          ? `<div style="width:40px; height:40px; background:#fff; border:1px solid #eee; border-radius:6px; padding:2px; margin:0 auto;"><img src="${item.imageUrl}" style="width:100%; height:100%; object-fit:contain;"></div>`
+          : `<div style="width:40px; height:40px; background:#f8fafc; border:1px solid #eee; border-radius:6px; margin:0 auto;"></div>`;
         
         let defHtml = `
           <div style="font-weight:bold; color:#2d3748; margin-bottom:2px; font-size:11px;">${escapeHtml(item.supplier) || '-'}${urlIcon}</div>
@@ -2990,6 +3005,7 @@
 
         html += `
         <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 12px 8px; text-align: center; vertical-align: middle;">${thumbHtml}</td>
           <td style="padding: 12px 8px; text-align: center; vertical-align: middle;">
             ${statusTag}<br>
             ${listToggleBtn}
@@ -3394,7 +3410,7 @@
         const newRow = {
           asin: orig.asin, title: orig.title, model: orig.model, jan: orig.jan,
           supplier: orig.supplier, purchase_url: orig.purchase_url, purchase_id: orig.purchase_id,
-          condition: orig.condition, description: orig.description,
+          condition: orig.condition, description: orig.description, image_url: orig.image_url,
           buy_price: orig.buy_price, shipping_cost: orig.shipping_cost, sell_price: orig.sell_price,
           fba_fee: orig.fba_fee, referral_fee: orig.referral_fee,
           is_listed: false, sku: orig.sku,
