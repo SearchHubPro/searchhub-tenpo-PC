@@ -3573,7 +3573,13 @@
             if (!u.order_number) u.order_number = rd.orderId; // 💡 CSVだけでもSKUを頼りに注文番号を紐付ける
 
             if (rd.isRefund) {
-              if (u.status_override === '返金済み' || u.status_override === '補填済み') { updateCount++; break; }
+              if (u.status_override === '返金済み' || u.status_override === '補填済み') {
+                // 💡 すでに返金済み等のマークが付いてても、過去のバグ等で売上額が0円になってなければここで補正救済する
+                if (u.status_override === '返金済み' && (Number(u.actual_sales) || 0) !== 0) {
+                  u.actual_sales = 0; u.actual_shipping = 0;
+                }
+                updateCount++; break;
+              }
 
               const currentSalesForCheck = Number(u.actual_sales) || 0;
               if (currentSalesForCheck !== 0) {
