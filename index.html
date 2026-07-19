@@ -1012,11 +1012,14 @@
       <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">商品名</label>
       <input type="text" id="edit_title" style="width:100%; padding:8px; box-sizing:border-box; background:#f8fafc;">
 
-      <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">写真URL（後から追加・変更OK）</label>
+      <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">写真（後から追加・変更OK）</label>
       <div style="display:flex; gap:8px; align-items:center;">
-        <input type="text" id="edit_imageUrl" placeholder="https://..." oninput="updateEditImagePreview()" style="flex:1; padding:8px; box-sizing:border-box;">
+        <input type="text" id="edit_imageUrl" placeholder="https://... または右のボタンで撮影" oninput="updateEditImagePreview()" style="flex:1; padding:8px; box-sizing:border-box;">
+        <button type="button" onclick="document.getElementById('edit_photoFile').click()" style="flex-shrink:0; background:#4a5568; color:white; border:none; padding:8px 10px; border-radius:6px; cursor:pointer;"><i class="fas fa-camera"></i></button>
+        <input type="file" id="edit_photoFile" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFileSelect(event, 'edit')">
         <img id="edit_imagePreview" src="" style="width:36px; height:36px; object-fit:contain; border:1px solid #eee; border-radius:6px; background:#f8fafc; display:none;">
       </div>
+      <div id="edit_uploadStatus" style="font-size:11px; color:#3182ce; margin-top:4px;"></div>
       
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
         <div><label style="font-size:11px; font-weight:bold;">型番</label><input type="text" id="edit_model" style="width:100%; padding:8px; box-sizing:border-box;"></div>
@@ -1084,8 +1087,14 @@
       <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">商品名<span style="color:#e53e3e;">*</span></label>
       <input type="text" id="flea_title" style="width:100%; padding:8px; box-sizing:border-box;">
 
-      <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">写真URL（任意・後から追加もOK）</label>
-      <input type="text" id="flea_imageUrl" placeholder="https://..." style="width:100%; padding:8px; box-sizing:border-box;">
+      <label style="font-size:11px; font-weight:bold; display:block; margin-top:8px;">写真（任意・後から追加もOK）</label>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" id="flea_imageUrl" placeholder="https://... または右のボタンで撮影" oninput="updateFleaImagePreview()" style="flex:1; padding:8px; box-sizing:border-box;">
+        <button type="button" onclick="document.getElementById('flea_photoFile').click()" style="flex-shrink:0; background:#4a5568; color:white; border:none; padding:8px 10px; border-radius:6px; cursor:pointer;"><i class="fas fa-camera"></i></button>
+        <input type="file" id="flea_photoFile" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFileSelect(event, 'flea')">
+      </div>
+      <div id="flea_uploadStatus" style="font-size:11px; color:#3182ce; margin-top:4px;"></div>
+      <img id="flea_imagePreview" src="" style="width:60px; height:60px; object-fit:contain; border:1px solid #eee; border-radius:6px; background:#f8fafc; display:none; margin-top:6px;">
 
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
         <div>
@@ -2353,6 +2362,8 @@
           document.getElementById('flea_imageUrl').value = '';
           document.getElementById('flea_buyPrice').value = '';
           document.getElementById('flea_sellPrice').value = '';
+          document.getElementById('flea_imagePreview').style.display = 'none';
+          document.getElementById('flea_uploadStatus').innerText = '';
 
           const now = new Date();
           document.getElementById('flea_purchaseDate').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -3637,6 +3648,65 @@
       document.getElementById('edit_actualShipping').value = Math.abs(item.shipping || 0);
       document.getElementById('edit_actualFee').value = Math.abs(item.fee || 0);
       calcEditProfit();
+    }
+
+    // ==========================================
+    // 📷 写真の撮影・アップロード（Supabase Storage）
+    // ==========================================
+    function resizeImageFile(file, maxDim = 1200, quality = 0.8) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handlePhotoFileSelect(event, context) {
+      const file = event.target.files[0];
+      if (!file) return;
+      event.target.value = ''; // 同じファイルを連続選択できるようにリセット
+
+      const urlInputId = context === 'flea' ? 'flea_imageUrl' : 'edit_imageUrl';
+      const statusId = context === 'flea' ? 'flea_uploadStatus' : 'edit_uploadStatus';
+      const statusEl = document.getElementById(statusId);
+      statusEl.innerText = '⌛ アップロード中...';
+
+      try {
+        const resizedBlob = await resizeImageFile(file);
+        const fileName = `${currentUser.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+        const { error: uploadError } = await sb.storage.from('product-images').upload(fileName, resizedBlob, { contentType: 'image/jpeg', upsert: false });
+        if (uploadError) throw uploadError;
+        const { data: urlData } = sb.storage.from('product-images').getPublicUrl(fileName);
+        document.getElementById(urlInputId).value = urlData.publicUrl;
+        if (context === 'flea') updateFleaImagePreview(); else updateEditImagePreview();
+        statusEl.innerText = '✅ アップロード完了！';
+        setTimeout(() => { statusEl.innerText = ''; }, 2000);
+      } catch (err) {
+        statusEl.innerText = '';
+        alert('❌ 写真のアップロードに失敗しました: ' + err.message);
+      }
+    }
+
+    function updateFleaImagePreview() {
+      const url = document.getElementById('flea_imageUrl').value.trim();
+      const img = document.getElementById('flea_imagePreview');
+      if (url) { img.src = url; img.style.display = 'block'; } else { img.style.display = 'none'; }
     }
 
     function updateEditImagePreview() {
