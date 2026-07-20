@@ -3493,6 +3493,10 @@
         if (reportType === "TXT" && Object.keys(txtH).length > 0) {
           let status = cols[txtH["order-status"]] || "";
           if (status.indexOf("Shipped") === -1) continue;
+          let salesChannelCol = cols[txtH["sales-channel"]] || "";
+          // 💡 sales-channelが「Non-Amazon」の注文は、item-priceが空欄など通常と違うデータ構造になってて
+          //    誤動作の原因になるため取込から除外する
+          if (salesChannelCol.trim() === "Non-Amazon") continue;
           let channel = cols[txtH["fulfillment-channel"]] || "";
           let isMerchant = (channel === "Merchant");
           reportData.push({
@@ -3693,7 +3697,9 @@
               u.actual_fee = currentFee + rd.refFee + rd.fbaFeeCSV + rd.pointFeeCSV + rd.promoFeeCSV + rd.hotenCSV;
               u.profit = u.actual_fee;
             }
-            if (rd.hotenCSV > 0) {
+            // 💡 「その他」欄は税金調整などの端数(数十円)で乗ることが多いので、
+            //    まとまった金額(1,000円以上)の時だけ補填として扱う
+            if (rd.hotenCSV >= 1000) {
               if (rd.salesFromCSV === 0) {
                 // 商品自体は元々売れてない、紛失などの純粋な補填 → 補填額を売上として計上
                 u.actual_sales = rd.hotenCSV; u.profit = rd.hotenCSV - m;
